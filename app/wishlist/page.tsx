@@ -34,6 +34,7 @@ export default function Wishlist() {
     const id = sessionStorage.getItem("personId");
     const name = sessionStorage.getItem("personName");
     const group = sessionStorage.getItem("groupName");
+    const groupId = sessionStorage.getItem("groupId");
     const loginCode = sessionStorage.getItem("loginCode");
 
     if (!id || !name) {
@@ -45,19 +46,19 @@ export default function Wishlist() {
     setPersonName(name);
     setGroupName(group || "");
 
-    if (loginCode) {
-      loadPersonData(loginCode);
+    if (loginCode && groupId) {
+      loadPersonData(loginCode, groupId);
     } else {
       setLoading(false);
     }
   }, [router]);
 
-  const loadPersonData = async (loginCode: string) => {
+  const loadPersonData = async (loginCode: string, groupId: string) => {
     try {
       const res = await fetch("/api/auth/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ loginCode }),
+        body: JSON.stringify({ loginCode, groupId }),
       });
 
       if (res.ok) {
@@ -147,8 +148,9 @@ export default function Wishlist() {
 
       // Reload to get updated assignment if available
       const loginCode = sessionStorage.getItem("loginCode");
-      if (loginCode) {
-        loadPersonData(loginCode);
+      const groupId = sessionStorage.getItem("groupId");
+      if (loginCode && groupId) {
+        loadPersonData(loginCode, groupId);
       }
 
       setTimeout(() => setSuccessMessage(""), 3000);
