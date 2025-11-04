@@ -1,0 +1,15 @@
+Dockerfile
+.dockerignore
+node_modules
+npm-debug.log
+README.md
+.next
+.git
+.gitignore
+*.md
+.env
+.env.local
+.env.*.local
+.DS_Store
+*.db
+*.db-journal

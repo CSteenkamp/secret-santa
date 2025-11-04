@@ -1,0 +1,87 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../app/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// A group represents a Secret Santa event (e.g., "Smith Family 2024")
+model Group {
+  id          String   @id @default(cuid())
+  name        String   // "Smith Family Secret Santa 2024"
+  inviteCode  String   @unique  // Unique code for people to join this group
+  year        Int      @default(2024)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relations
+  people      Person[]
+  assignments Assignment[]
+  adminConfig AdminConfig?
+}
+
+model Person {
+  id        String   @id @default(cuid())
+  groupId   String   // Links this person to their group
+  name      String
+  loginCode String   // Unique within this person's context
+  createdAt DateTime @default(now())
+
+  group         Group            @relation(fields: [groupId], references: [id], onDelete: Cascade)
+  wishlistItems WishlistItem[]
+  giverFor      Assignment[]     @relation("Giver")
+  receiverFor   Assignment[]     @relation("Receiver")
+
+  @@unique([groupId, loginCode])  // Login code must be unique within a group
+  @@index([groupId])
+  @@index([loginCode])
+}
+
+model WishlistItem {
+  id        String   @id @default(cuid())
+  personId  String
+  person    Person   @relation(fields: [personId], references: [id], onDelete: Cascade)
+  title     String
+  link      String
+  order     Int
+  createdAt DateTime @default(now())
+
+  @@index([personId])
+}
+
+model Assignment {
+  id         String   @id @default(cuid())
+  groupId    String   // Assignments are isolated per group
+  giverId    String
+  receiverId String
+  year       Int
+  createdAt  DateTime @default(now())
+
+  group    Group  @relation(fields: [groupId], references: [id], onDelete: Cascade)
+  giver    Person @relation("Giver", fields: [giverId], references: [id], onDelete: Cascade)
+  receiver Person @relation("Receiver", fields: [receiverId], references: [id], onDelete: Cascade)
+
+  @@unique([giverId, year])
+  @@index([groupId])
+  @@index([giverId])
+  @@index([receiverId])
+}
+
+model AdminConfig {
+  id             String   @id @default(cuid())
+  groupId        String   @unique  // Each group has its own admin
+  hashedPassword String
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  group Group @relation(fields: [groupId], references: [id], onDelete: Cascade)
+}
