@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 interface Person {
   id: string;
   name: string;
+  email?: string;
   loginCode: string;
   _count: { wishlistItems: number };
 }
@@ -20,6 +21,7 @@ export default function AdminDashboard() {
   const [people, setPeople] = useState<Person[]>([]);
   const [assignments, setAssignments] = useState<Assignment[]>([]);
   const [newPersonName, setNewPersonName] = useState("");
+  const [newPersonEmail, setNewPersonEmail] = useState("");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [successMessage, setSuccessMessage] = useState("");
@@ -75,7 +77,11 @@ export default function AdminDashboard() {
       const res = await fetch("/api/people", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name: newPersonName, groupId: groupInfo.id }),
+        body: JSON.stringify({
+          name: newPersonName,
+          email: newPersonEmail.trim() || undefined,
+          groupId: groupInfo.id
+        }),
       });
 
       const data = await res.json();
@@ -85,8 +91,10 @@ export default function AdminDashboard() {
         return;
       }
 
-      setSuccessMessage(`Added ${data.person.name} with code: ${data.person.loginCode}`);
+      const emailMsg = data.person.email ? ` and email: ${data.person.email}` : "";
+      setSuccessMessage(`Added ${data.person.name} with code: ${data.person.loginCode}${emailMsg}`);
       setNewPersonName("");
+      setNewPersonEmail("");
       loadData(groupInfo.id);
     } catch (err) {
       setError("An error occurred");
@@ -227,7 +235,7 @@ export default function AdminDashboard() {
             <form onSubmit={handleAddPerson} className="space-y-4">
               <div>
                 <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-2">
-                  Name
+                  Name <span className="text-red-500">*</span>
                 </label>
                 <input
                   type="text"
@@ -236,8 +244,27 @@ export default function AdminDashboard() {
                   onChange={(e) => setNewPersonName(e.target.value)}
                   className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent text-gray-900"
                   placeholder="Enter person's name"
+                  required
                 />
               </div>
+
+              <div>
+                <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
+                  Email <span className="text-gray-400">(optional)</span>
+                </label>
+                <input
+                  type="email"
+                  id="email"
+                  value={newPersonEmail}
+                  onChange={(e) => setNewPersonEmail(e.target.value)}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent text-gray-900"
+                  placeholder="person@example.com"
+                />
+                <p className="text-xs text-gray-500 mt-1">
+                  If provided, they can log in via email magic link instead of using the login code
+                </p>
+              </div>
+
               <button
                 type="submit"
                 className="w-full bg-green-600 text-white py-2 rounded-lg font-semibold hover:bg-green-700 transition"
@@ -289,6 +316,7 @@ export default function AdminDashboard() {
                 <thead>
                   <tr className="border-b">
                     <th className="text-left py-3 px-4 text-gray-900">Name</th>
+                    <th className="text-left py-3 px-4 text-gray-900">Email</th>
                     <th className="text-left py-3 px-4 text-gray-900">Login Code</th>
                     <th className="text-left py-3 px-4 text-gray-900">Wishlist Items</th>
                     <th className="text-left py-3 px-4 text-gray-900">Actions</th>
@@ -298,6 +326,18 @@ export default function AdminDashboard() {
                   {people.map((person) => (
                     <tr key={person.id} className="border-b hover:bg-gray-50">
                       <td className="py-3 px-4 text-gray-900">{person.name}</td>
+                      <td className="py-3 px-4">
+                        {person.email ? (
+                          <div className="flex items-center gap-2">
+                            <span className="text-gray-900 text-sm">{person.email}</span>
+                            <span className="bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded-full font-semibold">
+                              📧 Magic Link
+                            </span>
+                          </div>
+                        ) : (
+                          <span className="text-gray-400 text-sm italic">No email</span>
+                        )}
+                      </td>
                       <td className="py-3 px-4">
                         <code className="bg-gray-100 px-2 py-1 rounded font-mono text-gray-900">
                           {person.loginCode}

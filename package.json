@@ -13,6 +13,7 @@
     "bcryptjs": "^3.0.3",
     "dotenv": "^17.2.3",
     "next": "^14",
+    "nodemailer": "^6.9.7",
     "prisma": "^6.18.0",
     "react": "^18",
     "react-dom": "^18"
@@ -20,6 +21,7 @@
   "devDependencies": {
     "@types/bcryptjs": "^3.0.0",
     "@types/node": "^20",
+    "@types/nodemailer": "^6.4.14",
     "@types/react": "^18",
     "@types/react-dom": "^18",
     "autoprefixer": "^10.4.20",

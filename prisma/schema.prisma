@@ -33,6 +33,7 @@ model Person {
   id        String   @id @default(cuid())
   groupId   String   // Links this person to their group
   name      String
+  email     String?  // Optional email for magic link login
   loginCode String   // Unique within this person's context
   createdAt DateTime @default(now())
 
@@ -42,8 +43,10 @@ model Person {
   receiverFor   Assignment[]     @relation("Receiver")
 
   @@unique([groupId, loginCode])  // Login code must be unique within a group
+  @@unique([groupId, email])      // Email must be unique within a group (if provided)
   @@index([groupId])
   @@index([loginCode])
+  @@index([email])
 }
 
 model WishlistItem {

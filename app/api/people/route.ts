@@ -35,7 +35,7 @@ export async function GET(request: NextRequest) {
 // POST create a new person in a group
 export async function POST(request: NextRequest) {
   try {
-    const { name, groupId } = await request.json();
+    const { name, email, groupId } = await request.json();
 
     if (!name || name.trim().length === 0) {
       return NextResponse.json({ error: "Name is required" }, { status: 400 });
@@ -43,6 +43,23 @@ export async function POST(request: NextRequest) {
 
     if (!groupId) {
       return NextResponse.json({ error: "Group ID is required" }, { status: 400 });
+    }
+
+    // Validate email if provided
+    if (email && email.trim()) {
+      const emailTrimmed = email.trim().toLowerCase();
+
+      // Check if email is already used in this group
+      const existingEmail = await prisma.person.findFirst({
+        where: {
+          groupId,
+          email: emailTrimmed
+        },
+      });
+
+      if (existingEmail) {
+        return NextResponse.json({ error: "Email is already used in this group" }, { status: 400 });
+      }
     }
 
     // Generate unique login code for this group
@@ -62,6 +79,7 @@ export async function POST(request: NextRequest) {
     const person = await prisma.person.create({
       data: {
         name: name.trim(),
+        email: email && email.trim() ? email.trim().toLowerCase() : null,
         loginCode,
         groupId,
       },
