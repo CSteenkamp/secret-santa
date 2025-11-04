@@ -32,7 +32,7 @@ export default function Home() {
             <div className="text-red-600 text-5xl mb-4">🎁</div>
             <h2 className="text-2xl font-bold text-gray-900 mb-2">Join Existing Group</h2>
             <p className="text-gray-600">
-              Have an invite code? Join your family's Secret Santa group
+              Have an invite code? Join your family&apos;s Secret Santa group
             </p>
             <div className="mt-4 text-red-600 font-semibold group-hover:underline">
               Join Now →

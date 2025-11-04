@@ -204,7 +204,7 @@ export default function Wishlist() {
           {/* My Wishlist */}
           <div className="bg-white p-6 rounded-lg shadow-lg">
             <h2 className="text-2xl font-bold text-gray-800 mb-4">My Wishlist</h2>
-            <p className="text-sm text-gray-600 mb-4">Add 1-5 items you'd like to receive</p>
+            <p className="text-sm text-gray-600 mb-4">Add 1-5 items you&apos;d like to receive</p>
 
             <div className="space-y-4">
               {items.map((item, index) => (
@@ -272,7 +272,7 @@ export default function Wishlist() {
 
                 <div className="bg-red-50 p-4 rounded-lg">
                   <h3 className="font-semibold text-gray-900 mb-3">
-                    {assignment.receiver.name}'s Wishlist:
+                    {assignment.receiver.name}&apos;s Wishlist:
                   </h3>
 
                   {assignment.receiver.wishlistItems.length > 0 ? (
@@ -293,7 +293,7 @@ export default function Wishlist() {
                     </ul>
                   ) : (
                     <p className="text-gray-700 italic">
-                      {assignment.receiver.name} hasn't added their wishlist yet. Check back later!
+                      {assignment.receiver.name} hasn&apos;t added their wishlist yet. Check back later!
                     </p>
                   )}
                 </div>
@@ -302,7 +302,7 @@ export default function Wishlist() {
               <div className="text-center py-8">
                 <div className="text-6xl mb-4">🎁</div>
                 <p className="text-gray-900">
-                  Secret Santa assignments haven't been generated yet.
+                  Secret Santa assignments haven&apos;t been generated yet.
                 </p>
                 <p className="text-sm text-gray-700 mt-2">
                   Check back later or contact the admin!

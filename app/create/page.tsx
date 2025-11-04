@@ -120,7 +120,7 @@ export default function CreateGroup() {
               minLength={6}
             />
             <p className="text-xs text-gray-500 mt-1">
-              You'll use this to access the admin portal
+              You&apos;ll use this to access the admin portal
             </p>
           </div>
 

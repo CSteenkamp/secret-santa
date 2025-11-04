@@ -26,15 +26,14 @@ services:
     container_name: secret-santa-app
     restart: unless-stopped
     ports:
-      - "3000:3000"
+      - "3001:3000"
     environment:
       - DATABASE_URL=postgresql://secretsanta:${DB_PASSWORD:-changeme123}@db:5432/secretsanta?schema=public
       - NODE_ENV=production
     depends_on:
       db:
         condition: service_healthy
-    command: >
-      sh -c "npx prisma migrate deploy && node server.js"
+    command: ["node", "server.js"]
 
 volumes:
   postgres_data:
