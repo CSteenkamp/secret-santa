@@ -17,6 +17,11 @@ interface Assignment {
   receiver: { name: string; wishlistItems: Array<{ title: string; link: string }> };
 }
 
+interface GroupBudget {
+  budgetAmount?: number;
+  budgetCurrency?: string;
+}
+
 export default function AdminDashboard() {
   const [people, setPeople] = useState<Person[]>([]);
   const [assignments, setAssignments] = useState<Assignment[]>([]);
@@ -26,6 +31,9 @@ export default function AdminDashboard() {
   const [error, setError] = useState("");
   const [successMessage, setSuccessMessage] = useState("");
   const [groupInfo, setGroupInfo] = useState({ id: "", name: "", inviteCode: "" });
+  const [budget, setBudget] = useState<GroupBudget>({ budgetAmount: undefined, budgetCurrency: "USD" });
+  const [budgetAmount, setBudgetAmount] = useState("");
+  const [budgetCurrency, setBudgetCurrency] = useState("USD");
   const router = useRouter();
 
   useEffect(() => {
@@ -46,16 +54,28 @@ export default function AdminDashboard() {
 
   const loadData = async (groupId: string) => {
     try {
-      const [peopleRes, assignmentsRes] = await Promise.all([
+      const [peopleRes, assignmentsRes, groupRes] = await Promise.all([
         fetch(`/api/people?groupId=${groupId}`),
         fetch(`/api/assignments?groupId=${groupId}`),
+        fetch(`/api/groups/${groupId}`),
       ]);
 
       const peopleData = await peopleRes.json();
       const assignmentsData = await assignmentsRes.json();
+      const groupData = await groupRes.json();
 
       setPeople(peopleData.people || []);
       setAssignments(assignmentsData.assignments || []);
+
+      if (groupData.group) {
+        setBudget({
+          budgetAmount: groupData.group.budgetAmount,
+          budgetCurrency: groupData.group.budgetCurrency || "USD"
+        });
+        setBudgetAmount(groupData.group.budgetAmount?.toString() || "");
+        setBudgetCurrency(groupData.group.budgetCurrency || "USD");
+      }
+
       setLoading(false);
     } catch (err) {
       setError("Failed to load data");
@@ -184,6 +204,42 @@ export default function AdminDashboard() {
     }
   };
 
+  const handleUpdateBudget = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError("");
+    setSuccessMessage("");
+
+    const amount = budgetAmount.trim() ? parseFloat(budgetAmount) : undefined;
+
+    if (budgetAmount.trim() && (isNaN(amount!) || amount! <= 0)) {
+      setError("Please enter a valid budget amount");
+      return;
+    }
+
+    try {
+      const res = await fetch(`/api/groups/${groupInfo.id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          budgetAmount: amount,
+          budgetCurrency: budgetCurrency,
+        }),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        setError(data.error || "Failed to update budget");
+        return;
+      }
+
+      setSuccessMessage("Budget updated successfully!");
+      setBudget({ budgetAmount: amount, budgetCurrency });
+    } catch (err) {
+      setError("An error occurred");
+    }
+  };
+
   const handleLogout = () => {
     sessionStorage.clear();
     router.push("/");
@@ -228,7 +284,7 @@ export default function AdminDashboard() {
           </div>
         )}
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Add Person Section */}
           <div className="bg-white p-6 rounded-lg shadow-lg">
             <h2 className="text-2xl font-bold text-gray-800 mb-4">Add Person</h2>
@@ -270,6 +326,74 @@ export default function AdminDashboard() {
                 className="w-full bg-green-600 text-white py-2 rounded-lg font-semibold hover:bg-green-700 transition"
               >
                 Add Person
+              </button>
+            </form>
+          </div>
+
+          {/* Budget Management */}
+          <div className="bg-white p-6 rounded-lg shadow-lg">
+            <h2 className="text-2xl font-bold text-gray-800 mb-4">Gift Budget</h2>
+            <form onSubmit={handleUpdateBudget} className="space-y-4">
+              <div>
+                <label htmlFor="budgetAmount" className="block text-sm font-medium text-gray-700 mb-2">
+                  Budget Amount <span className="text-gray-400">(optional)</span>
+                </label>
+                <input
+                  type="number"
+                  id="budgetAmount"
+                  value={budgetAmount}
+                  onChange={(e) => setBudgetAmount(e.target.value)}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent text-gray-900"
+                  placeholder="50.00"
+                  step="0.01"
+                  min="0"
+                />
+              </div>
+
+              <div>
+                <label htmlFor="budgetCurrency" className="block text-sm font-medium text-gray-700 mb-2">
+                  Currency
+                </label>
+                <select
+                  id="budgetCurrency"
+                  value={budgetCurrency}
+                  onChange={(e) => setBudgetCurrency(e.target.value)}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent text-gray-900"
+                >
+                  <option value="USD">USD - US Dollar</option>
+                  <option value="EUR">EUR - Euro</option>
+                  <option value="GBP">GBP - British Pound</option>
+                  <option value="CAD">CAD - Canadian Dollar</option>
+                  <option value="AUD">AUD - Australian Dollar</option>
+                  <option value="ZAR">ZAR - South African Rand</option>
+                  <option value="JPY">JPY - Japanese Yen</option>
+                  <option value="CHF">CHF - Swiss Franc</option>
+                  <option value="SEK">SEK - Swedish Krona</option>
+                  <option value="NOK">NOK - Norwegian Krone</option>
+                  <option value="DKK">DKK - Danish Krone</option>
+                  <option value="NZD">NZD - New Zealand Dollar</option>
+                  <option value="MXN">MXN - Mexican Peso</option>
+                  <option value="BRL">BRL - Brazilian Real</option>
+                  <option value="INR">INR - Indian Rupee</option>
+                  <option value="CNY">CNY - Chinese Yuan</option>
+                  <option value="KRW">KRW - South Korean Won</option>
+                  <option value="SGD">SGD - Singapore Dollar</option>
+                </select>
+              </div>
+
+              <div className="text-sm text-gray-600">
+                {budget.budgetAmount ? (
+                  <p>Current budget: <span className="font-semibold">{budget.budgetCurrency} {budget.budgetAmount}</span></p>
+                ) : (
+                  <p className="italic">No budget set</p>
+                )}
+              </div>
+
+              <button
+                type="submit"
+                className="w-full bg-blue-600 text-white py-2 rounded-lg font-semibold hover:bg-blue-700 transition"
+              >
+                Update Budget
               </button>
             </form>
           </div>

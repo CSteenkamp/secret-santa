@@ -1,0 +1,16 @@
+User-agent: *
+Allow: /
+Allow: /create
+Allow: /join
+Allow: /login
+
+# Disallow sensitive areas
+Disallow: /admin/
+Disallow: /api/
+Disallow: /auth/verify*
+
+# Sitemap location
+Sitemap: https://santa.wagnerway.co.za/sitemap.xml
+
+# Crawl delay (be respectful)
+Crawl-delay: 1

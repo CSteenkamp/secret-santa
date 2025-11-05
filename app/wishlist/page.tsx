@@ -24,6 +24,7 @@ export default function Wishlist() {
     { title: "", link: "" },
   ]);
   const [assignment, setAssignment] = useState<Assignment | null>(null);
+  const [budget, setBudget] = useState<{ amount?: number; currency?: string } | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
@@ -55,14 +56,17 @@ export default function Wishlist() {
 
   const loadPersonData = async (loginCode: string, groupId: string) => {
     try {
-      const res = await fetch("/api/auth/login", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ loginCode, groupId }),
-      });
+      const [authRes, groupRes] = await Promise.all([
+        fetch("/api/auth/login", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ loginCode, groupId }),
+        }),
+        fetch(`/api/groups/${groupId}`)
+      ]);
 
-      if (res.ok) {
-        const data = await res.json();
+      if (authRes.ok) {
+        const data = await authRes.json();
 
         // Load existing wishlist items
         if (data.person.wishlistItems && data.person.wishlistItems.length > 0) {
@@ -76,6 +80,17 @@ export default function Wishlist() {
         // Load assignment
         if (data.person.assignment) {
           setAssignment(data.person.assignment);
+        }
+      }
+
+      // Load group budget information
+      if (groupRes.ok) {
+        const groupData = await groupRes.json();
+        if (groupData.group && groupData.group.budgetAmount) {
+          setBudget({
+            amount: groupData.group.budgetAmount,
+            currency: groupData.group.budgetCurrency || "USD"
+          });
         }
       }
 
@@ -181,6 +196,11 @@ export default function Wishlist() {
             <h1 className="text-4xl font-bold text-green-600">Welcome, {personName}!</h1>
             {groupName && <p className="text-gray-700 mt-1">{groupName}</p>}
             <p className="text-gray-600 mt-1 text-sm">Manage your wishlist and Secret Santa assignment</p>
+            {budget && (
+              <div className="mt-2 inline-flex items-center bg-blue-50 border border-blue-200 text-blue-800 px-3 py-1 rounded-lg text-sm font-medium">
+                💰 Gift Budget: {budget.currency} {budget.amount}
+              </div>
+            )}
           </div>
           <button
             onClick={handleLogout}
