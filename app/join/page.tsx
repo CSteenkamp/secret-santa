@@ -1,10 +1,11 @@
 "use client";
 
-import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { Suspense, useCallback, useEffect, useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 
-export default function JoinGroup() {
+function JoinGroupInner() {
+  const searchParams = useSearchParams();
   const [inviteCode, setInviteCode] = useState("");
   const [userType, setUserType] = useState<"admin" | "participant" | null>(null);
   const [error, setError] = useState("");
@@ -12,8 +13,7 @@ export default function JoinGroup() {
   const [groupInfo, setGroupInfo] = useState<{ id: string; name: string; year: number } | null>(null);
   const router = useRouter();
 
-  const handleVerifyCode = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const verifyCode = useCallback(async (code: string) => {
     setError("");
     setLoading(true);
 
@@ -21,7 +21,7 @@ export default function JoinGroup() {
       const res = await fetch("/api/groups/verify", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ inviteCode: inviteCode.trim().toUpperCase() }),
+        body: JSON.stringify({ inviteCode: code.trim().toUpperCase() }),
       });
 
       const data = await res.json();
@@ -38,6 +38,20 @@ export default function JoinGroup() {
       setError("An error occurred. Please try again.");
       setLoading(false);
     }
+  }, []);
+
+  // Support shareable links like /join?code=ABC123: prefill and verify automatically.
+  useEffect(() => {
+    const fromLink = (searchParams.get("code") || "").trim().toUpperCase();
+    if (fromLink.length === 6) {
+      setInviteCode(fromLink);
+      verifyCode(fromLink);
+    }
+  }, [searchParams, verifyCode]);
+
+  const handleVerifyCode = async (e: React.FormEvent) => {
+    e.preventDefault();
+    await verifyCode(inviteCode);
   };
 
   const handleProceed = (type: "admin" | "participant") => {
@@ -112,23 +126,24 @@ export default function JoinGroup() {
             </div>
 
             <div className="space-y-3">
-              <p className="text-sm text-gray-300 text-center font-medium">
-                How would you like to continue?
-              </p>
-
-              <button
-                onClick={() => handleProceed("admin")}
-                className="w-full bg-santa-red text-white py-3 rounded-xl font-semibold hover:bg-santa-red-dark transition-all duration-300 hover:scale-105 transform"
-              >
-                Admin Portal
-              </button>
-
               <button
                 onClick={() => handleProceed("participant")}
                 className="w-full bg-santa-green text-white py-3 rounded-xl font-semibold hover:bg-santa-green-dark transition-all duration-300 hover:scale-105 transform"
               >
-                Participant Login
+                I&apos;m a participant &rarr; Log in
               </button>
+              <p className="text-xs text-gray-500 text-center">
+                You&apos;ll need the personal login code the organizer sent you.
+              </p>
+
+              <div className="pt-2 border-t border-white/5 text-center">
+                <button
+                  onClick={() => handleProceed("admin")}
+                  className="text-sm text-gray-400 hover:text-santa-gold transition-colors underline underline-offset-2 min-h-[44px]"
+                >
+                  I&apos;m the organizer &rarr; Admin Portal
+                </button>
+              </div>
             </div>
           </div>
         )}
@@ -140,5 +155,13 @@ export default function JoinGroup() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function JoinGroup() {
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-santa-dark" />}>
+      <JoinGroupInner />
+    </Suspense>
   );
 }

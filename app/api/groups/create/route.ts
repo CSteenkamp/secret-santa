@@ -3,6 +3,7 @@ import { prisma } from "@/lib/db";
 import { generateGroupInviteCode } from "@/lib/utils";
 import { validatePassword } from "@/lib/password";
 import bcrypt from "bcryptjs";
+import { getSession } from "@/lib/session";
 
 export async function POST(request: NextRequest) {
   try {
@@ -49,6 +50,15 @@ export async function POST(request: NextRequest) {
         adminConfig: true,
       },
     });
+
+    // Log the creator straight in as admin so they land on the dashboard
+    // without re-typing the password they just chose.
+    const session = await getSession();
+    session.isAdmin = true;
+    session.adminGroupId = group.id;
+    session.adminGroupName = group.name;
+    session.adminInviteCode = group.inviteCode;
+    await session.save();
 
     return NextResponse.json({
       group: {

@@ -1,16 +1,10 @@
 User-agent: *
 Allow: /
-Allow: /create
-Allow: /join
-Allow: /login
-Allow: /terms
-Allow: /privacy
-Allow: /refunds
 
-# Disallow sensitive areas
+# Private, session-bound areas
 Disallow: /admin/
+Disallow: /wishlist
 Disallow: /api/
-Disallow: /auth/verify*
+Disallow: /auth/
 
-# Sitemap location
 Sitemap: https://secretsanta.wagnerway.co.za/sitemap.xml

@@ -231,12 +231,12 @@ describe('POST /api/groups/create', () => {
     expect(json.error).toBe('Group name is required');
   });
 
-  it('returns 400 when admin password is shorter than 12 characters', async () => {
+  it('returns 400 when admin password is shorter than 8 characters', async () => {
     const req = makePostRequest(url, { groupName: 'Test Group', adminPassword: 'Short1' });
     const res = await createGroup(req);
     expect(res.status).toBe(400);
     const json = await res.json();
-    expect(json.error).toBe('Password must be at least 12 characters long');
+    expect(json.error).toBe('Password must be at least 8 characters long');
   });
 
   it('returns 400 when admin password has no uppercase letter', async () => {
@@ -279,6 +279,14 @@ describe('POST /api/groups/create', () => {
 
     expect(generateGroupInviteCode).toHaveBeenCalled();
     expect(bcrypt.hash).toHaveBeenCalledWith(VALID_PASSWORD, 12);
+
+    // The creator is logged in as admin straight away (no second password prompt).
+    const session = (getSession as jest.Mock).mock.results[0].value as Promise<MockSession>;
+    const saved = await session;
+    expect(saved.isAdmin).toBe(true);
+    expect(saved.adminGroupId).toBe('group-1');
+    expect(saved.adminInviteCode).toBe('ABC123');
+    expect(saved.save).toHaveBeenCalled();
     expect(mockPrismaDb.group.create).toHaveBeenCalledWith(
       expect.objectContaining({
         data: expect.objectContaining({ name: 'Test Group', inviteCode: 'ABC123' }),

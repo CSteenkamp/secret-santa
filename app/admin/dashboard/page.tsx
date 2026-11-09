@@ -44,6 +44,34 @@ function AdminDashboardInner() {
   const [upgrading, setUpgrading] = useState(false);
   const router = useRouter();
   const searchParams = useSearchParams();
+  const [showWelcome, setShowWelcome] = useState(false);
+  const [origin, setOrigin] = useState("");
+
+  useEffect(() => {
+    setOrigin(window.location.origin);
+    if (searchParams.get("welcome") === "1") {
+      setShowWelcome(true);
+      router.replace("/admin/dashboard");
+    }
+  }, [searchParams, router]);
+
+  const joinLink = groupInfo.inviteCode ? `${origin}/join?code=${groupInfo.inviteCode}` : "";
+
+  const copyText = async (text: string, label: string) => {
+    setError("");
+    try {
+      await navigator.clipboard.writeText(text);
+      setSuccessMessage(`${label} copied to clipboard.`);
+    } catch {
+      window.prompt(`Copy this ${label.toLowerCase()}:`, text);
+    }
+  };
+
+  const inviteMessage = (person: Person) =>
+    `Hi ${person.name}! You're invited to ${groupInfo.name} (Secret Santa).\n` +
+    `1. Open ${joinLink}\n` +
+    `2. Choose "Participant Login" and enter your personal code: ${person.loginCode}\n` +
+    `3. Add a few wishlist ideas so your Secret Santa knows what you'd like.`;
 
 
   const loadData = useCallback(async (groupId: string) => {
@@ -335,9 +363,23 @@ function AdminDashboardInner() {
           <div className="min-w-0">
             <h1 className="text-2xl sm:text-4xl font-bold text-santa-red font-display">Admin Dashboard</h1>
             <p className="text-gray-300 mt-1 text-sm sm:text-base truncate">{groupInfo.name}</p>
-            <p className="text-sm text-gray-400">
-              Invite Code: <code className="bg-santa-dark border border-white/10 px-2 py-1 rounded font-mono text-santa-gold text-xs sm:text-sm">{groupInfo.inviteCode}</code>
-              <span className={`ml-3 inline-block text-xs px-2 py-0.5 rounded-full border font-semibold ${planInfo.plan === "unlimited" ? "bg-santa-gold/10 text-santa-gold border-santa-gold/30" : "bg-white/5 text-gray-300 border-white/10"}`}>
+            <p className="text-sm text-gray-400 flex flex-wrap items-center gap-2">
+              <span>Invite Code: <code className="bg-santa-dark border border-white/10 px-2 py-1 rounded font-mono text-santa-gold text-xs sm:text-sm">{groupInfo.inviteCode}</code></span>
+              <button
+                type="button"
+                onClick={() => copyText(groupInfo.inviteCode, "Invite code")}
+                className="text-xs text-santa-gold hover:text-santa-gold-dark underline underline-offset-2"
+              >
+                Copy code
+              </button>
+              <button
+                type="button"
+                onClick={() => copyText(joinLink, "Join link")}
+                className="text-xs text-santa-gold hover:text-santa-gold-dark underline underline-offset-2"
+              >
+                Copy join link
+              </button>
+              <span className={`inline-block text-xs px-2 py-0.5 rounded-full border font-semibold ${planInfo.plan === "unlimited" ? "bg-santa-gold/10 text-santa-gold border-santa-gold/30" : "bg-white/5 text-gray-300 border-white/10"}`}>
                 {planInfo.plan === "unlimited" ? "Unlimited plan" : "Free plan"}
               </span>
             </p>
@@ -349,6 +391,25 @@ function AdminDashboardInner() {
             Logout
           </button>
         </div>
+
+        {showWelcome && (
+          <div className="bg-santa-green/10 border border-santa-green/30 text-santa-snow px-5 py-4 rounded-xl mb-6">
+            <div className="flex justify-between items-start gap-4">
+              <div>
+                <h2 className="font-bold text-santa-green text-lg mb-1">🎉 Your group is ready!</h2>
+                <ol className="list-decimal list-inside text-sm text-gray-300 space-y-1">
+                  <li>Add everyone taking part below (name is enough, email is optional).</li>
+                  <li>Use <strong>Copy invite</strong> next to each person to send them their join link and personal code.</li>
+                  <li>Once everyone is in, click <strong>Generate Assignments</strong>.</li>
+                </ol>
+                <p className="text-xs text-gray-400 mt-2">
+                  Bookmark this page. To get back later, go to <span className="text-santa-gold">Join Existing Group</span>, enter your invite code and choose Admin Portal.
+                </p>
+              </div>
+              <button onClick={() => setShowWelcome(false)} aria-label="Dismiss" className="text-gray-400 hover:text-santa-snow text-xl leading-none">&times;</button>
+            </div>
+          </div>
+        )}
 
         {error && (
           <div className="bg-santa-red/10 border border-santa-red/30 text-santa-red px-4 py-3 rounded-lg mb-4">
@@ -555,14 +616,23 @@ function AdminDashboardInner() {
             <div className="space-y-3 md:hidden">
               {people.map((person) => (
                 <div key={person.id} className="bg-santa-dark/50 border border-white/5 rounded-lg p-4">
-                  <div className="flex justify-between items-start mb-2">
+                  <div className="flex justify-between items-start mb-2 gap-2">
                     <span className="font-semibold text-santa-snow">{person.name}</span>
-                    <button
-                      onClick={() => handleDeletePerson(person.id, person.name)}
-                      className="text-santa-red hover:text-santa-red-dark font-semibold text-sm min-h-[44px] min-w-[44px] flex items-center justify-center"
-                    >
-                      Delete
-                    </button>
+                    <div className="flex items-center gap-3">
+                      <button
+                        type="button"
+                        onClick={() => copyText(inviteMessage(person), "Invite")}
+                        className="text-santa-gold hover:text-santa-gold-dark font-semibold text-sm min-h-[44px] flex items-center"
+                      >
+                        Copy invite
+                      </button>
+                      <button
+                        onClick={() => handleDeletePerson(person.id, person.name)}
+                        className="text-santa-red hover:text-santa-red-dark font-semibold text-sm min-h-[44px] min-w-[44px] flex items-center justify-center"
+                      >
+                        Delete
+                      </button>
+                    </div>
                   </div>
                   {person.email && (
                     <p className="text-gray-400 text-sm truncate mb-1">{person.email}</p>
@@ -633,7 +703,14 @@ function AdminDashboardInner() {
                           )}
                         </div>
                       </td>
-                      <td className="py-3 px-4">
+                      <td className="py-3 px-4 whitespace-nowrap">
+                        <button
+                          type="button"
+                          onClick={() => copyText(inviteMessage(person), "Invite")}
+                          className="text-santa-gold hover:text-santa-gold-dark font-semibold text-sm mr-4"
+                        >
+                          Copy invite
+                        </button>
                         <button
                           onClick={() => handleDeletePerson(person.id, person.name)}
                           className="text-santa-red hover:text-santa-red-dark font-semibold text-sm"

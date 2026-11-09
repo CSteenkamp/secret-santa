@@ -22,7 +22,7 @@ export default function Login() {
     const storedGroupName = sessionStorage.getItem("groupName");
 
     if (!storedGroupId) {
-      router.push("/");
+      router.push("/join");
       return;
     }
 
@@ -163,12 +163,12 @@ export default function Login() {
                 value={loginCode}
                 onChange={(e) => setLoginCode(e.target.value.toUpperCase())}
                 className="w-full px-4 py-3 bg-santa-dark border border-white/10 rounded-lg focus:ring-2 focus:ring-santa-gold focus:border-transparent text-center font-mono text-2xl tracking-wider text-santa-snow"
-                placeholder="XXXXX"
+                placeholder="XXXXXXXX"
                 maxLength={8}
                 required
               />
               <p className="text-xs text-gray-500 mt-1">
-                Your login code was provided by the admin
+                Your 8-character login code was shared with you by the organizer
               </p>
             </div>
 

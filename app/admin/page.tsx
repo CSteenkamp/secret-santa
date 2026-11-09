@@ -18,8 +18,8 @@ export default function AdminLogin() {
     const storedGroupName = sessionStorage.getItem("groupName");
 
     if (!storedGroupId) {
-      // No group selected, redirect to home
-      router.push("/");
+      // No group selected, send them to the invite-code step
+      router.push("/join");
       return;
     }
 

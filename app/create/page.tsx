@@ -25,8 +25,8 @@ export default function CreateGroup() {
       return;
     }
 
-    if (adminPassword.length < 12) {
-      setError("Admin password must be at least 12 characters with uppercase, lowercase, and a number");
+    if (adminPassword.length < 8) {
+      setError("Admin password must be at least 8 characters with uppercase, lowercase, and a number");
       setLoading(false);
       return;
     }
@@ -58,13 +58,8 @@ export default function CreateGroup() {
         return;
       }
 
-      // Store group info and redirect to admin login
-      sessionStorage.setItem("groupId", data.group.id);
-      sessionStorage.setItem("groupName", data.group.name);
-      sessionStorage.setItem("inviteCode", data.group.inviteCode);
-      sessionStorage.setItem("adminAuth", "pending");
-
-      router.push("/admin");
+      // The server logged us in as admin; go straight to the dashboard.
+      router.push("/admin/dashboard?welcome=1");
     } catch (err) {
       setError("An error occurred. Please try again.");
       setLoading(false);
@@ -95,7 +90,7 @@ export default function CreateGroup() {
               value={groupName}
               onChange={(e) => setGroupName(e.target.value)}
               className="w-full px-4 py-2 bg-santa-dark border border-white/10 rounded-lg focus:ring-2 focus:ring-santa-gold focus:border-transparent text-santa-snow placeholder-gray-500"
-              placeholder="Smith Family Secret Santa 2024"
+              placeholder={`Smith Family Secret Santa ${new Date().getFullYear()}`}
               required
             />
           </div>
@@ -126,9 +121,9 @@ export default function CreateGroup() {
               value={adminPassword}
               onChange={(e) => setAdminPassword(e.target.value)}
               className="w-full px-4 py-2 bg-santa-dark border border-white/10 rounded-lg focus:ring-2 focus:ring-santa-gold focus:border-transparent text-santa-snow placeholder-gray-500"
-              placeholder="Min 12 chars, upper+lower+number"
+              placeholder="Min 8 chars, upper+lower+number"
               required
-              minLength={12}
+              minLength={8}
             />
             <p className="text-xs text-gray-500 mt-1">
               You&apos;ll use this to access the admin portal

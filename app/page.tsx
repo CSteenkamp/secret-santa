@@ -2,44 +2,17 @@ import Link from "next/link";
 import { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Free Secret Santa Generator - Organize Gift Exchanges Online | Secret Santa App",
-  description: "Free online Secret Santa generator for families, friends, and offices. Create gift exchange groups, manage wishlists, and automatically assign Secret Santa partners. No registration required!",
-  keywords: "secret santa generator, free secret santa, online gift exchange, secret santa app, family gift exchange, office secret santa, wishlist manager, secret santa organizer, christmas gift exchange, holiday gift exchange",
+  title: "Free Secret Santa Generator – Online Gift Exchange Organizer",
+  description:
+    "Free Secret Santa generator for families, friends and offices. Draw names online, share one invite link, collect wishlists. No sign-up, free for up to 10 people.",
+  alternates: { canonical: "/" },
   openGraph: {
-    title: "Free Secret Santa Generator - Organize Gift Exchanges Online",
-    description: "Create and manage Secret Santa gift exchanges for your family, friends, or office. Free, easy to use, and no registration required!",
-    url: "https://secretsanta.wagnerway.co.za",
-    siteName: "Secret Santa Generator",
+    title: "Free Secret Santa Generator – Online Gift Exchange Organizer",
+    description:
+      "Draw names online, share one invite link and collect wishlists. Free for groups up to 10, no sign-up required.",
+    url: "/",
     type: "website",
-    images: [
-      {
-        url: "https://secretsanta.wagnerway.co.za/og-image.png",
-        width: 1200,
-        height: 630,
-        alt: "Secret Santa Generator - Free Online Gift Exchange"
-      }
-    ]
   },
-  twitter: {
-    card: "summary_large_image",
-    title: "Free Secret Santa Generator - Organize Gift Exchanges Online",
-    description: "Create and manage Secret Santa gift exchanges for your family, friends, or office. Free, easy to use, and no registration required!",
-    images: ["https://secretsanta.wagnerway.co.za/og-image.png"]
-  },
-  robots: {
-    index: true,
-    follow: true,
-    googleBot: {
-      index: true,
-      follow: true,
-      "max-video-preview": -1,
-      "max-image-preview": "large",
-      "max-snippet": -1,
-    },
-  },
-  alternates: {
-    canonical: "https://secretsanta.wagnerway.co.za"
-  }
 };
 
 export default function Home() {
@@ -80,15 +53,8 @@ export default function Home() {
       "name": "Secret Santa Generator",
       "url": "https://secretsanta.wagnerway.co.za"
     },
-    "screenshot": "https://secretsanta.wagnerway.co.za/og-image.png",
-    "softwareVersion": "2.0",
-    "aggregateRating": {
-      "@type": "AggregateRating",
-      "ratingValue": "4.8",
-      "ratingCount": "1250",
-      "bestRating": "5",
-      "worstRating": "1"
-    }
+    "screenshot": "https://secretsanta.wagnerway.co.za/opengraph-image",
+    "softwareVersion": "2.1"
   };
 
   const faqStructuredData = {
@@ -324,6 +290,13 @@ export default function Home() {
                 No registration required, just pure holiday fun!
               </p>
 
+              <ul className="flex flex-wrap justify-center gap-x-6 gap-y-2 text-sm text-gray-300 mb-10" aria-label="Key benefits">
+                <li>✅ No sign-up or app download</li>
+                <li>✅ Free for groups up to 10</li>
+                <li>✅ One invite link for everyone</li>
+                <li>✅ Wishlists with product links</li>
+                <li>✅ Works on any phone</li>
+              </ul>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-2xl mx-auto mb-12">
                 <Link
                   href="/create"
@@ -546,6 +519,70 @@ export default function Home() {
         </section>
 
         {/* FAQ Section */}
+        {/* Guides: evergreen content for organisers searching how to run a Secret Santa */}
+        <section className="py-20 bg-[#151528]" aria-labelledby="guides-heading">
+          <div className="container mx-auto px-4">
+            <div className="text-center mb-14">
+              <h2 id="guides-heading" className="text-2xl sm:text-4xl md:text-5xl font-bold mb-4 font-display">
+                How to Run a <span className="text-santa-green">Secret Santa</span> That Actually Works
+              </h2>
+              <p className="text-lg sm:text-xl text-gray-400 max-w-3xl mx-auto">
+                Quick, practical answers to the questions every organizer asks, whether it&apos;s a family draw or an office gift exchange.
+              </p>
+            </div>
+
+            <div className="grid md:grid-cols-2 gap-8 max-w-6xl mx-auto">
+              <article className="bg-santa-dark/60 p-8 rounded-2xl border border-white/5">
+                <h3 className="text-xl font-bold text-santa-gold mb-3">Secret Santa rules, in 30 seconds</h3>
+                <p className="text-gray-400 leading-relaxed">
+                  Everyone in the group is secretly matched with one other person to buy a gift for. Nobody draws themselves,
+                  everyone gives exactly one gift and receives exactly one, and the giver stays anonymous until the reveal.
+                  Agree a budget up front so gifts feel fair, set a date for the exchange, and ask people to add a few wishlist
+                  ideas so nobody has to guess. Our generator enforces the no-self-draw rule automatically.
+                </p>
+              </article>
+
+              <article className="bg-santa-dark/60 p-8 rounded-2xl border border-white/5">
+                <h3 className="text-xl font-bold text-santa-gold mb-3">Organizing an office Secret Santa</h3>
+                <p className="text-gray-400 leading-relaxed">
+                  Keep it opt-in and keep the budget modest: $10 to $25 works for most teams. Create the group, paste the
+                  join link into Slack, Teams or an email, and send each colleague their personal code. People who join late
+                  can be added right up until you generate the draw. For teams larger than 10 people, the one-time Unlimited
+                  upgrade removes the participant cap for that group.
+                </p>
+              </article>
+
+              <article className="bg-santa-dark/60 p-8 rounded-2xl border border-white/5">
+                <h3 className="text-xl font-bold text-santa-gold mb-3">Virtual Secret Santa for remote teams and far-flung families</h3>
+                <p className="text-gray-400 leading-relaxed">
+                  Because the draw happens online, nobody needs to be in the same room. Each person logs in from their phone,
+                  sees only their own match, and can open their recipient&apos;s wishlist links to order a gift straight to their
+                  door. Set the budget in the currency your group actually uses, from ZAR and GBP to USD and EUR.
+                </p>
+              </article>
+
+              <article className="bg-santa-dark/60 p-8 rounded-2xl border border-white/5">
+                <h3 className="text-xl font-bold text-santa-gold mb-3">Secret Santa gift ideas that land</h3>
+                <p className="text-gray-400 leading-relaxed">
+                  The best gifts come from the wishlist, so nudge everyone to add three to five items with links. If a
+                  wishlist is empty, safe bets under most budgets are good coffee or tea, a quality notebook, cosy socks,
+                  a board game, a scented candle, or a voucher for a local coffee shop. Check the budget the organizer set
+                  before you shop; it is shown on your wishlist page.
+                </p>
+              </article>
+            </div>
+
+            <div className="text-center mt-12">
+              <Link
+                href="/create"
+                className="inline-block bg-santa-green text-white px-8 py-4 rounded-xl font-bold text-base sm:text-lg hover:bg-santa-green-dark transition-colors hover:scale-105 transform duration-300"
+              >
+                Start your Secret Santa group, it&apos;s free &rarr;
+              </Link>
+            </div>
+          </div>
+        </section>
+
         <section className="py-20 bg-santa-dark" aria-labelledby="faq-heading">
           <div className="container mx-auto px-4">
             <div className="text-center mb-14">
@@ -583,7 +620,7 @@ export default function Home() {
               Ready to Create Your Secret Santa Magic?
             </h2>
             <p className="text-xl mb-10 text-white/80 max-w-2xl mx-auto">
-              Join thousands of families, friends, and offices who use our free secret santa organizer for their holiday gift exchanges
+              Set up your group in about two minutes. Free for up to 10 people, no account needed, and everyone gets one link to join.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Link

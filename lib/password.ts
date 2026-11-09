@@ -4,10 +4,10 @@ export interface PasswordValidation {
 }
 
 export function validatePassword(password: string): PasswordValidation {
-  if (!password || password.length < 12) {
+  if (!password || password.length < 8) {
     return {
       valid: false,
-      error: "Password must be at least 12 characters long",
+      error: "Password must be at least 8 characters long",
     };
   }
 
