@@ -1,5 +1,7 @@
 "use client";
 
+import Link from "next/link";
+
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 
@@ -188,6 +190,9 @@ export default function Wishlist() {
             <h1 className="text-2xl sm:text-4xl font-bold text-santa-gold font-display truncate">Welcome, {personName}!</h1>
             {groupName && <p className="text-gray-300 mt-1 text-sm sm:text-base truncate">{groupName}</p>}
             <p className="text-gray-400 mt-1 text-sm">Manage your wishlist and Secret Santa assignment</p>
+            <p className="text-gray-500 mt-1 text-xs">
+              Like this? <Link href="/create" className="text-santa-gold hover:text-santa-gold-dark underline underline-offset-2">Organize your own Secret Santa</Link>, free for up to 10 people.
+            </p>
             {budget && (
               <div className="mt-2 inline-flex items-center bg-santa-gold/10 border border-santa-gold/30 text-santa-gold px-3 py-1 rounded-lg text-sm font-medium">
                 💰 Budget: {budget.currency} {budget.amount}

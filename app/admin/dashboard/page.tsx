@@ -76,7 +76,8 @@ function AdminDashboardInner() {
     `Hi ${person.name}! You're invited to ${groupInfo.name} (Secret Santa).\n` +
     `1. Open ${joinLink}\n` +
     `2. Choose "Participant Login" and enter your personal code: ${person.loginCode}\n` +
-    `3. Add a few wishlist ideas so your Secret Santa knows what you'd like.`;
+    `3. Add a few wishlist ideas so your Secret Santa knows what you'd like.\n\n` +
+    `(Sent with Secret Santa Generator, free at ${origin})`;
 
 
   const loadData = useCallback(async (groupId: string) => {
