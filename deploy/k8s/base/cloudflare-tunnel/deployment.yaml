@@ -7,6 +7,9 @@ metadata:
   labels: { app.kubernetes.io/name: secretsanta-cloudflared }
 spec:
   replicas: 1
+  # Single replica on a node at its pod cap: replace in place instead of surging.
+  strategy:
+    type: Recreate
   selector:
     matchLabels: { app.kubernetes.io/name: secretsanta-cloudflared }
   template:
