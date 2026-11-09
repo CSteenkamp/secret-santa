@@ -1,0 +1,26 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+# Live deployment on shell-primary: secretsanta.wagnerway.co.za.
+# Apply with: kubectl apply -k deploy/k8s/overlays/shell-primary
+namespace: secretsanta
+resources:
+  - ../../base
+images:
+  - name: ghcr.io/csteenkamp/secret-santa
+    newTag: latest
+patches:
+  - target: {kind: ConfigMap, name: secretsanta-cloudflared-config}
+    patch: |-
+      - op: replace
+        path: /data/config.yaml
+        value: |
+          tunnel: 7aeae5e3-716b-4f3e-b245-c44e4bdfe3e4
+          credentials-file: /etc/cloudflared/credentials/credentials.json
+          metrics: 0.0.0.0:2000
+          no-autoupdate: true
+          ingress:
+            - hostname: secretsanta.wagnerway.co.za
+              service: http://secretsanta-web:3000
+              originRequest:
+                connectTimeout: 30s
+            - service: http_status:404

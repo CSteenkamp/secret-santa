@@ -1,0 +1,13 @@
+# Placeholder tunnel config; the overlay patches in the real tunnel UUID and hostname.
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: secretsanta-cloudflared-config
+data:
+  config.yaml: |
+    tunnel: REPLACED-BY-OVERLAY
+    credentials-file: /etc/cloudflared/credentials/credentials.json
+    metrics: 0.0.0.0:2000
+    no-autoupdate: true
+    ingress:
+      - service: http_status:404

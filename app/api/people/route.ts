@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { generateLoginCode } from "@/lib/utils";
 import { getSession } from "@/lib/session";
+import { enforceParticipantLimit } from "@/lib/plan-limits";
 
 // GET all people for a group
 export async function GET(request: NextRequest) {
@@ -64,6 +65,12 @@ export async function POST(request: NextRequest) {
     // Verify admin owns this group
     if (session.adminGroupId !== groupId) {
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+    }
+
+    // Free groups are capped; Unlimited groups are not
+    const limit = await enforceParticipantLimit(groupId);
+    if (!limit.allowed) {
+      return NextResponse.json({ error: limit.message, code: limit.code }, { status: 403 });
     }
 
     // Validate email if provided

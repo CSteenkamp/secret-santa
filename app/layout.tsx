@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
+import { SiteFooter } from "@/components/SiteFooter";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -13,11 +14,11 @@ export const metadata: Metadata = {
   keywords: "secret santa generator, free secret santa, online gift exchange, secret santa app, family gift exchange, office secret santa, wishlist manager, secret santa organizer",
   authors: [{ name: "Secret Santa Generator" }],
   creator: "Secret Santa Generator",
-  metadataBase: new URL("https://santa.wagnerway.co.za"),
+  metadataBase: new URL("https://secretsecretsanta.wagnerway.co.za"),
   openGraph: {
     type: "website",
     locale: "en_US",
-    url: "https://santa.wagnerway.co.za",
+    url: "https://secretsecretsanta.wagnerway.co.za",
     siteName: "Secret Santa Generator",
     title: "Secret Santa Generator - Free Online Gift Exchange",
     description: "Create and manage Secret Santa gift exchanges for your family, friends, or office. Free, easy to use, and no registration required!",
@@ -46,7 +47,7 @@ export const metadata: Metadata = {
     },
   },
   alternates: {
-    canonical: "https://santa.wagnerway.co.za",
+    canonical: "https://secretsecretsanta.wagnerway.co.za",
   },
 };
 
@@ -68,6 +69,7 @@ export default function RootLayout({
       </head>
       <body className={`${inter.className} antialiased`}>
         {children}
+        <SiteFooter />
         <script
           dangerouslySetInnerHTML={{
             __html: `

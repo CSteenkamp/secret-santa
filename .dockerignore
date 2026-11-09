@@ -2,7 +2,6 @@ Dockerfile
 .dockerignore
 node_modules
 npm-debug.log
-README.md
 .next
 .git
 .gitignore
@@ -13,3 +12,9 @@ README.md
 .DS_Store
 *.db
 *.db-journal
+deploy
+e2e
+__tests__
+playwright-report
+test-results
+coverage

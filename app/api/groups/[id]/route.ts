@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { getSession } from "@/lib/session";
+import { normalizePlan, PLANS } from "@/lib/stripe";
 
 export const dynamic = 'force-dynamic';
 
@@ -34,7 +35,15 @@ export async function GET(
       return NextResponse.json({ error: "Group not found" }, { status: 404 });
     }
 
-    return NextResponse.json({ group });
+    const plan = normalizePlan(group.plan);
+    const maxParticipants = PLANS[plan].maxParticipants;
+    return NextResponse.json({
+      group: {
+        ...group,
+        plan,
+        maxParticipants: Number.isFinite(maxParticipants) ? maxParticipants : null,
+      },
+    });
   } catch (error) {
     console.error("Error fetching group:", error);
     return NextResponse.json({ error: "Internal server error" }, { status: 500 });

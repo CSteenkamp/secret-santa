@@ -1,0 +1,17 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+# Secrets (secretsanta-db, secretsanta-secrets, secretsanta-cloudflared-credentials,
+# ghcr-pull) are created out of band; see deploy/k8s/base/secrets/README.md.
+resources:
+  - namespace.yaml
+  - postgres/cluster.yaml
+  - app/configmap.yaml
+  - app/web.yaml
+  - cloudflare-tunnel/configmap.yaml
+  - cloudflare-tunnel/deployment.yaml
+
+labels:
+  - includeSelectors: false
+    pairs:
+      app.kubernetes.io/part-of: secret-santa

@@ -1,0 +1,47 @@
+# cloudflared dials out to Cloudflare, so the cluster exposes no public ports.
+# TLS terminates at Cloudflare's edge; the hop to the web pod is cluster-internal HTTP.
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: secretsanta-cloudflared
+  labels: { app.kubernetes.io/name: secretsanta-cloudflared }
+spec:
+  replicas: 1
+  selector:
+    matchLabels: { app.kubernetes.io/name: secretsanta-cloudflared }
+  template:
+    metadata:
+      labels: { app.kubernetes.io/name: secretsanta-cloudflared }
+    spec:
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 65532
+        seccompProfile: { type: RuntimeDefault }
+      containers:
+        - name: cloudflared
+          image: cloudflare/cloudflared:2026.10.5
+          args: ["tunnel", "--config", "/etc/cloudflared/config.yaml", "run"]
+          volumeMounts:
+            - { name: tunnel-config, mountPath: /etc/cloudflared, readOnly: true }
+            - { name: tunnel-credentials, mountPath: /etc/cloudflared/credentials, readOnly: true }
+          livenessProbe:
+            httpGet: { path: /ready, port: 2000 }
+            initialDelaySeconds: 10
+            periodSeconds: 10
+            failureThreshold: 3
+          readinessProbe:
+            httpGet: { path: /ready, port: 2000 }
+            initialDelaySeconds: 5
+            periodSeconds: 5
+          resources:
+            requests: { cpu: 20m, memory: 64Mi }
+            limits: { memory: 128Mi }
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities: { drop: ["ALL"] }
+      volumes:
+        - name: tunnel-config
+          configMap: { name: secretsanta-cloudflared-config }
+        - name: tunnel-credentials
+          secret: { secretName: secretsanta-cloudflared-credentials }

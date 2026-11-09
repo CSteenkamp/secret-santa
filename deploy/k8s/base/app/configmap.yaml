@@ -1,0 +1,17 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: secretsanta-config
+data:
+  NEXTAUTH_URL: "https://secretsanta.wagnerway.co.za"
+  MAGIC_LINK_EXPIRES_MINUTES: "15"
+  # SMTP for magic-link login. EMAIL_USER / EMAIL_PASS live in secretsanta-secrets.
+  EMAIL_HOST: "email-smtp.eu-west-1.amazonaws.com"
+  EMAIL_PORT: "587"
+  EMAIL_FROM: "Secret Santa <noreply@flippingeasy.co.za>"
+  # Stripe Price for the one-time Unlimited upgrade (Realtap account)
+  STRIPE_PRICE_UNLIMITED: "price_1UZr3KBkC5aYbBTBKa5lNMkK"
+  # Legal pages
+  LEGAL_OPERATOR: "Flippingeasy LLC, trading as Realtap"
+  LEGAL_CONTACT_EMAIL: "support@realtap.app"
+  LEGAL_JURISDICTION: "the Republic of South Africa"

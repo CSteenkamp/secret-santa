@@ -1,0 +1,85 @@
+# The Next.js server. Prisma migrations run in an init container before each
+# new version starts.
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: secretsanta-web
+  labels: { app.kubernetes.io/name: secretsanta-web }
+spec:
+  replicas: 1
+  revisionHistoryLimit: 5
+  selector:
+    matchLabels: { app.kubernetes.io/name: secretsanta-web }
+  template:
+    metadata:
+      labels: { app.kubernetes.io/name: secretsanta-web }
+    spec:
+      imagePullSecrets:
+        - name: ghcr-pull
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        runAsGroup: 1000
+        fsGroup: 1000
+        seccompProfile: { type: RuntimeDefault }
+      initContainers:
+        - name: migrate
+          image: ghcr.io/csteenkamp/secret-santa
+          command: ["node", "node_modules/prisma/build/index.js", "migrate", "deploy"]
+          env:
+            - name: DATABASE_URL
+              valueFrom: { secretKeyRef: { name: secretsanta-secrets, key: DATABASE_URL } }
+          volumeMounts:
+            - { name: tmp, mountPath: /tmp }
+          resources:
+            requests: { cpu: 20m, memory: 96Mi }
+            limits: { memory: 256Mi }
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities: { drop: ["ALL"] }
+      containers:
+        - name: web
+          image: ghcr.io/csteenkamp/secret-santa
+          ports:
+            - { name: http, containerPort: 3000 }
+          envFrom:
+            - configMapRef: { name: secretsanta-config }
+            - secretRef: { name: secretsanta-secrets }
+          startupProbe:
+            httpGet: { path: /api/health, port: http }
+            periodSeconds: 2
+            failureThreshold: 30
+          readinessProbe:
+            httpGet: { path: /api/health, port: http }
+            periodSeconds: 10
+            failureThreshold: 3
+          livenessProbe:
+            httpGet: { path: /api/health, port: http }
+            periodSeconds: 20
+            failureThreshold: 3
+          resources:
+            requests: { cpu: 50m, memory: 160Mi }
+            limits: { memory: 512Mi }
+          volumeMounts:
+            - { name: next-cache, mountPath: /app/.next/cache }
+            - { name: tmp, mountPath: /tmp }
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities: { drop: ["ALL"] }
+      volumes:
+        - name: next-cache
+          emptyDir: { sizeLimit: 256Mi }
+        - name: tmp
+          emptyDir: { sizeLimit: 64Mi }
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: secretsanta-web
+  labels: { app.kubernetes.io/name: secretsanta-web }
+spec:
+  selector: { app.kubernetes.io/name: secretsanta-web }
+  ports:
+    - { name: http, port: 3000, targetPort: http }

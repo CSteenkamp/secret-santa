@@ -3,7 +3,9 @@ Allow: /
 Allow: /create
 Allow: /join
 Allow: /login
-Allow: /pricing
+Allow: /terms
+Allow: /privacy
+Allow: /refunds
 
 # Disallow sensitive areas
 Disallow: /admin/
@@ -11,7 +13,4 @@ Disallow: /api/
 Disallow: /auth/verify*
 
 # Sitemap location
-Sitemap: https://santa.wagnerway.co.za/sitemap.xml
-
-# Crawl delay (be respectful)
-Crawl-delay: 1
+Sitemap: https://secretsanta.wagnerway.co.za/sitemap.xml

@@ -20,7 +20,7 @@ model Group {
   name           String   // "Smith Family Secret Santa 2024"
   inviteCode     String   @unique  // Unique code for people to join this group
   year           Int      @default(2024)
-  plan           String   @default("free") // free, plus, pro
+  plan           String   @default("free") // free, unlimited (legacy: plus, pro)
   budgetAmount   Float?   // Optional budget amount
   budgetCurrency String   @default("USD") // Currency code
   createdAt      DateTime @default(now())
@@ -98,7 +98,12 @@ model Subscription {
   groupId                String    @unique
   stripeCustomerId       String?
   stripeSubscriptionId   String?   @unique
-  plan                   String    @default("free") // free, plus, pro
+  stripeCheckoutSessionId String?  @unique // one-time Unlimited purchase
+  stripePaymentIntentId  String?
+  amountTotal            Int?      // minor units, e.g. 1000 = $10.00
+  currency               String?
+  customerEmail          String?
+  plan                   String    @default("free") // free, unlimited (legacy: plus, pro)
   status                 String    @default("active") // active, canceled, past_due, unpaid
   currentPeriodEnd       DateTime?
   createdAt              DateTime  @default(now())

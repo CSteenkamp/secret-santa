@@ -1,0 +1,35 @@
+# PostgreSQL 17 via CloudNativePG. One role (`secretsanta`) owns the schema; the
+# web pod's init container applies Prisma migrations.
+apiVersion: postgresql.cnpg.io/v1
+kind: Cluster
+metadata:
+  name: secretsanta-pg
+spec:
+  instances: 1
+  imageName: ghcr.io/cloudnative-pg/postgresql:17
+  enableSuperuserAccess: false
+  storage:
+    size: 2Gi
+    storageClass: postgres-local
+    resizeInUseVolumes: true
+  resources:
+    requests: { cpu: 50m, memory: 192Mi }
+    limits: { memory: 512Mi }
+  bootstrap:
+    initdb:
+      database: secretsanta
+      owner: secretsanta
+      encoding: UTF8
+      secret: { name: secretsanta-db }
+  managed:
+    roles:
+      - name: secretsanta
+        ensure: present
+        login: true
+        superuser: false
+        inherit: true
+        connectionLimit: -1
+        passwordSecret: { name: secretsanta-db }
+  postgresql:
+    pg_hba:
+      - hostssl secretsanta secretsanta 0.0.0.0/0 scram-sha-256

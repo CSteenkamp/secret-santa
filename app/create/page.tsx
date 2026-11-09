@@ -9,6 +9,7 @@ export default function CreateGroup() {
   const [adminPassword, setAdminPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [year, setYear] = useState(new Date().getFullYear());
+  const [agreed, setAgreed] = useState(false);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const router = useRouter();
@@ -32,6 +33,12 @@ export default function CreateGroup() {
 
     if (adminPassword !== confirmPassword) {
       setError("Passwords do not match");
+      setLoading(false);
+      return;
+    }
+
+    if (!agreed) {
+      setError("Please accept the Terms of Service and Privacy Policy to continue");
       setLoading(false);
       return;
     }
@@ -142,6 +149,21 @@ export default function CreateGroup() {
               required
             />
           </div>
+
+          <label className="flex items-start gap-3 text-sm text-gray-300 cursor-pointer">
+            <input
+              type="checkbox"
+              checked={agreed}
+              onChange={(e) => setAgreed(e.target.checked)}
+              className="mt-1 h-4 w-4 rounded border-white/20 bg-santa-dark accent-santa-green"
+            />
+            <span>
+              I agree to the{" "}
+              <Link href="/terms" target="_blank" className="text-santa-gold underline">Terms of Service</Link> and{" "}
+              <Link href="/privacy" target="_blank" className="text-santa-gold underline">Privacy Policy</Link>, and I have
+              permission to add the participants I invite.
+            </span>
+          </label>
 
           {error && (
             <div className="bg-santa-red/10 border border-santa-red/30 text-santa-red px-4 py-3 rounded-lg">

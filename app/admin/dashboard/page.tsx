@@ -1,7 +1,8 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
+import { Suspense, useCallback, useEffect, useState } from "react";
+import Link from "next/link";
+import { useRouter, useSearchParams } from "next/navigation";
 
 interface Person {
   id: string;
@@ -22,7 +23,12 @@ interface GroupBudget {
   budgetCurrency?: string;
 }
 
-export default function AdminDashboard() {
+interface PlanInfo {
+  plan: "free" | "unlimited";
+  maxParticipants: number | null;
+}
+
+function AdminDashboardInner() {
   const [people, setPeople] = useState<Person[]>([]);
   const [assignments, setAssignments] = useState<Assignment[]>([]);
   const [newPersonName, setNewPersonName] = useState("");
@@ -34,7 +40,46 @@ export default function AdminDashboard() {
   const [budget, setBudget] = useState<GroupBudget>({ budgetAmount: undefined, budgetCurrency: "USD" });
   const [budgetAmount, setBudgetAmount] = useState("");
   const [budgetCurrency, setBudgetCurrency] = useState("USD");
+  const [planInfo, setPlanInfo] = useState<PlanInfo>({ plan: "free", maxParticipants: 10 });
+  const [upgrading, setUpgrading] = useState(false);
   const router = useRouter();
+  const searchParams = useSearchParams();
+
+
+  const loadData = useCallback(async (groupId: string) => {
+    try {
+      const [peopleRes, assignmentsRes, groupRes] = await Promise.all([
+        fetch(`/api/people?groupId=${groupId}`),
+        fetch(`/api/assignments?groupId=${groupId}`),
+        fetch(`/api/groups/${groupId}`),
+      ]);
+
+      const peopleData = await peopleRes.json();
+      const assignmentsData = await assignmentsRes.json();
+      const groupData = await groupRes.json();
+
+      setPeople(peopleData.people || []);
+      setAssignments(assignmentsData.assignments || []);
+
+      if (groupData.group) {
+        setPlanInfo({
+          plan: groupData.group.plan === "unlimited" ? "unlimited" : "free",
+          maxParticipants: groupData.group.maxParticipants ?? null,
+        });
+        setBudget({
+          budgetAmount: groupData.group.budgetAmount,
+          budgetCurrency: groupData.group.budgetCurrency || "USD"
+        });
+        setBudgetAmount(groupData.group.budgetAmount?.toString() || "");
+        setBudgetCurrency(groupData.group.budgetCurrency || "USD");
+      }
+
+      setLoading(false);
+    } catch (err) {
+      setError("Failed to load data");
+      setLoading(false);
+    }
+  }, []);
 
   useEffect(() => {
     // Check admin session from server
@@ -56,36 +101,58 @@ export default function AdminDashboard() {
       .catch(() => {
         router.push("/admin");
       });
-  }, [router]);
+  }, [router, loadData]);
 
-  const loadData = async (groupId: string) => {
+  // After Stripe redirects back, verify the payment server-side and apply the upgrade.
+  useEffect(() => {
+    const checkout = searchParams.get("checkout");
+    const sessionId = searchParams.get("session_id");
+    if (!checkout || !groupInfo.id) return;
+
+    if (checkout === "cancelled") {
+      setError("Checkout was cancelled. No payment was taken.");
+      router.replace("/admin/dashboard");
+      return;
+    }
+
+    if (checkout === "success" && sessionId) {
+      fetch("/api/stripe/confirm", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ sessionId }),
+      })
+        .then(async (res) => {
+          const data = await res.json();
+          if (res.ok) {
+            setSuccessMessage("Payment received. Your group now has the Unlimited plan.");
+            loadData(groupInfo.id);
+          } else if (res.status === 402) {
+            setSuccessMessage("Payment is still processing. The upgrade will be applied as soon as Stripe confirms it.");
+          } else {
+            setError(data.error || "Could not confirm the payment. Contact support if you were charged.");
+          }
+        })
+        .catch(() => setError("Could not confirm the payment. Please refresh in a minute."))
+        .finally(() => router.replace("/admin/dashboard"));
+    }
+  }, [searchParams, groupInfo.id, loadData, router]);
+
+  const handleUpgrade = async () => {
+    setError("");
+    setSuccessMessage("");
+    setUpgrading(true);
     try {
-      const [peopleRes, assignmentsRes, groupRes] = await Promise.all([
-        fetch(`/api/people?groupId=${groupId}`),
-        fetch(`/api/assignments?groupId=${groupId}`),
-        fetch(`/api/groups/${groupId}`),
-      ]);
-
-      const peopleData = await peopleRes.json();
-      const assignmentsData = await assignmentsRes.json();
-      const groupData = await groupRes.json();
-
-      setPeople(peopleData.people || []);
-      setAssignments(assignmentsData.assignments || []);
-
-      if (groupData.group) {
-        setBudget({
-          budgetAmount: groupData.group.budgetAmount,
-          budgetCurrency: groupData.group.budgetCurrency || "USD"
-        });
-        setBudgetAmount(groupData.group.budgetAmount?.toString() || "");
-        setBudgetCurrency(groupData.group.budgetCurrency || "USD");
+      const res = await fetch("/api/stripe/checkout", { method: "POST" });
+      const data = await res.json();
+      if (!res.ok || !data.url) {
+        setError(data.error || "Could not start checkout");
+        setUpgrading(false);
+        return;
       }
-
-      setLoading(false);
+      window.location.href = data.url;
     } catch (err) {
-      setError("Failed to load data");
-      setLoading(false);
+      setError("Could not start checkout");
+      setUpgrading(false);
     }
   };
 
@@ -251,6 +318,8 @@ export default function AdminDashboard() {
     router.push("/");
   };
 
+  const atLimit = planInfo.maxParticipants !== null && people.length >= planInfo.maxParticipants;
+
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-santa-dark">
@@ -268,6 +337,9 @@ export default function AdminDashboard() {
             <p className="text-gray-300 mt-1 text-sm sm:text-base truncate">{groupInfo.name}</p>
             <p className="text-sm text-gray-400">
               Invite Code: <code className="bg-santa-dark border border-white/10 px-2 py-1 rounded font-mono text-santa-gold text-xs sm:text-sm">{groupInfo.inviteCode}</code>
+              <span className={`ml-3 inline-block text-xs px-2 py-0.5 rounded-full border font-semibold ${planInfo.plan === "unlimited" ? "bg-santa-gold/10 text-santa-gold border-santa-gold/30" : "bg-white/5 text-gray-300 border-white/10"}`}>
+                {planInfo.plan === "unlimited" ? "Unlimited plan" : "Free plan"}
+              </span>
             </p>
           </div>
           <button
@@ -290,7 +362,7 @@ export default function AdminDashboard() {
           </div>
         )}
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-8">
           {/* Add Person Section */}
           <div className="bg-[#151528] p-6 rounded-2xl border border-white/10 card-glow">
             <h2 className="text-2xl font-bold text-santa-snow mb-4">Add Person</h2>
@@ -329,11 +401,48 @@ export default function AdminDashboard() {
 
               <button
                 type="submit"
-                className="w-full bg-santa-green text-white py-2 rounded-xl font-semibold hover:bg-santa-green-dark transition-all duration-300 hover:scale-105 transform"
+                disabled={atLimit}
+                className="w-full bg-santa-green text-white py-2 rounded-xl font-semibold hover:bg-santa-green-dark transition-all duration-300 hover:scale-105 transform disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
               >
                 Add Person
               </button>
+              {planInfo.maxParticipants !== null && (
+                <p className={`text-xs ${atLimit ? "text-santa-gold" : "text-gray-500"}`}>
+                  {people.length}/{planInfo.maxParticipants} participants on the Free plan.
+                  {atLimit && " Upgrade to Unlimited to add more."}
+                </p>
+              )}
             </form>
+          </div>
+
+          {/* Plan / Upgrade */}
+          <div className="bg-[#151528] p-6 rounded-2xl border border-white/10 card-glow">
+            <h2 className="text-2xl font-bold text-santa-snow mb-4">Plan</h2>
+            {planInfo.plan === "unlimited" ? (
+              <div className="space-y-3">
+                <p className="text-santa-gold font-semibold">🏆 Unlimited plan active</p>
+                <p className="text-gray-400 text-sm">This group has no participant limit. Thank you for supporting Secret Santa Generator!</p>
+              </div>
+            ) : (
+              <div className="space-y-4">
+                <p className="text-gray-400 text-sm">
+                  The Free plan allows up to {planInfo.maxParticipants ?? 10} participants in this group. Unlock unlimited participants for
+                  this group with a one-time payment of <span className="text-santa-snow font-semibold">$10 USD</span>.
+                </p>
+                <button
+                  onClick={handleUpgrade}
+                  disabled={upgrading}
+                  className="w-full bg-santa-gold text-santa-dark py-2 rounded-xl font-semibold hover:bg-santa-gold-dark transition-all duration-300 hover:scale-105 transform disabled:opacity-50"
+                >
+                  {upgrading ? "Redirecting to Stripe..." : "Upgrade to Unlimited — $10"}
+                </button>
+                <p className="text-xs text-gray-500">
+                  Secure checkout by Stripe. By purchasing you agree to our{" "}
+                  <Link href="/terms" className="underline hover:text-santa-gold" target="_blank">Terms</Link> and{" "}
+                  <Link href="/refunds" className="underline hover:text-santa-gold" target="_blank">Refund Policy</Link> (14-day refunds).
+                </p>
+              </div>
+            )}
           </div>
 
           {/* Budget Management */}
@@ -588,5 +697,19 @@ export default function AdminDashboard() {
         )}
       </div>
     </div>
+  );
+}
+
+export default function AdminDashboard() {
+  return (
+    <Suspense
+      fallback={
+        <div className="min-h-screen flex items-center justify-center bg-santa-dark">
+          <div className="text-xl text-santa-gold">Loading...</div>
+        </div>
+      }
+    >
+      <AdminDashboardInner />
+    </Suspense>
   );
 }
