@@ -17,6 +17,15 @@ COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 RUN npx prisma generate && npm run build
 
+# A self-contained Prisma CLI (with its transitive deps) for `migrate deploy`,
+# pinned to the versions in package-lock.json.
+FROM node:22-alpine AS prisma-cli
+WORKDIR /prisma
+COPY package.json package-lock.json ./
+RUN node -e "const l=require('./package-lock.json').packages;const v=n=>l['node_modules/'+n].version;require('fs').writeFileSync('cli.json',JSON.stringify({name:'prisma-cli',private:true,dependencies:{prisma:v('prisma'),'@prisma/client':v('@prisma/client'),dotenv:v('dotenv')}}))" \
+ && mv cli.json package.json && rm package-lock.json \
+ && npm install --omit=dev --no-audit --no-fund
+
 FROM node:22-alpine AS runtime
 RUN apk add --no-cache libc6-compat openssl
 WORKDIR /app
@@ -27,14 +36,12 @@ ENV NODE_ENV=production \
 COPY --from=build --chown=node:node /app/.next/standalone ./
 COPY --from=build --chown=node:node /app/.next/static ./.next/static
 COPY --from=build --chown=node:node /app/public ./public
-# Prisma: schema, migrations, config and the CLI + engines for `migrate deploy`
+# Prisma: schema, migrations, config, generated client, and the CLI (merged into
+# the traced node_modules) so the init container can run `migrate deploy`.
 COPY --from=build --chown=node:node /app/prisma ./prisma
 COPY --from=build --chown=node:node /app/prisma.config.ts ./prisma.config.ts
-COPY --from=build --chown=node:node /app/node_modules/prisma ./node_modules/prisma
-COPY --from=build --chown=node:node /app/node_modules/@prisma ./node_modules/@prisma
-COPY --from=build --chown=node:node /app/node_modules/.prisma ./node_modules/.prisma
-COPY --from=build --chown=node:node /app/node_modules/dotenv ./node_modules/dotenv
 COPY --from=build --chown=node:node /app/app/generated ./app/generated
+COPY --from=prisma-cli --chown=node:node /prisma/node_modules ./node_modules
 USER node
 EXPOSE 3000
 CMD ["node", "server.js"]
