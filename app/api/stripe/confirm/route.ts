@@ -22,7 +22,16 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Invalid session id' }, { status: 400 });
     }
 
-    const checkout = await getStripe().checkout.sessions.retrieve(sessionId);
+    let checkout;
+    try {
+      checkout = await getStripe().checkout.sessions.retrieve(sessionId);
+    } catch (err) {
+      const code = (err as { code?: string; type?: string }).code;
+      if (code === 'resource_missing' || (err as { type?: string }).type === 'StripeInvalidRequestError') {
+        return NextResponse.json({ error: 'Unknown checkout session' }, { status: 404 });
+      }
+      throw err;
+    }
     const groupId = checkout.metadata?.groupId || checkout.client_reference_id;
 
     if (groupId !== session.adminGroupId) {
