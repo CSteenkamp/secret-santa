@@ -8,6 +8,9 @@ metadata:
 spec:
   replicas: 1
   revisionHistoryLimit: 5
+  # Single replica on a node close to its pod limit: replace in place rather
+  # than running old and new pods side by side.
+  strategy: { type: Recreate }
   selector:
     matchLabels: { app.kubernetes.io/name: secretsanta-web }
   template:
