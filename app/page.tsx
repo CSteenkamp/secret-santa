@@ -8,12 +8,12 @@ export const metadata: Metadata = {
   openGraph: {
     title: "Free Secret Santa Generator - Organize Gift Exchanges Online",
     description: "Create and manage Secret Santa gift exchanges for your family, friends, or office. Free, easy to use, and no registration required!",
-    url: "https://secretsecretsanta.wagnerway.co.za",
+    url: "https://secretsanta.wagnerway.co.za",
     siteName: "Secret Santa Generator",
     type: "website",
     images: [
       {
-        url: "https://secretsecretsanta.wagnerway.co.za/og-image.png",
+        url: "https://secretsanta.wagnerway.co.za/og-image.png",
         width: 1200,
         height: 630,
         alt: "Secret Santa Generator - Free Online Gift Exchange"
@@ -24,7 +24,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "Free Secret Santa Generator - Organize Gift Exchanges Online",
     description: "Create and manage Secret Santa gift exchanges for your family, friends, or office. Free, easy to use, and no registration required!",
-    images: ["https://secretsecretsanta.wagnerway.co.za/og-image.png"]
+    images: ["https://secretsanta.wagnerway.co.za/og-image.png"]
   },
   robots: {
     index: true,
@@ -38,7 +38,7 @@ export const metadata: Metadata = {
     },
   },
   alternates: {
-    canonical: "https://secretsecretsanta.wagnerway.co.za"
+    canonical: "https://secretsanta.wagnerway.co.za"
   }
 };
 
@@ -48,7 +48,7 @@ export default function Home() {
     "@type": "WebApplication",
     "name": "Secret Santa Generator",
     "description": "Free online Secret Santa generator to organize gift exchanges for families, friends, and offices. Create groups, manage wishlists, and automatically assign Secret Santa partners.",
-    "url": "https://secretsecretsanta.wagnerway.co.za",
+    "url": "https://secretsanta.wagnerway.co.za",
     "applicationCategory": "Lifestyle",
     "operatingSystem": "All",
     "offers": [
@@ -78,9 +78,9 @@ export default function Home() {
     "provider": {
       "@type": "Organization",
       "name": "Secret Santa Generator",
-      "url": "https://secretsecretsanta.wagnerway.co.za"
+      "url": "https://secretsanta.wagnerway.co.za"
     },
-    "screenshot": "https://secretsecretsanta.wagnerway.co.za/og-image.png",
+    "screenshot": "https://secretsanta.wagnerway.co.za/og-image.png",
     "softwareVersion": "2.0",
     "aggregateRating": {
       "@type": "AggregateRating",
@@ -210,21 +210,21 @@ export default function Home() {
         "@type": "HowToStep",
         "name": "Create Your Secret Santa Group",
         "text": "Visit the Secret Santa Generator and click 'Create New Group'. Enter your group name, year, and set an admin password. You'll receive a unique invite code to share with participants.",
-        "url": "https://secretsecretsanta.wagnerway.co.za/create",
+        "url": "https://secretsanta.wagnerway.co.za/create",
         "position": 1
       },
       {
         "@type": "HowToStep",
         "name": "Add Participants and Share Invite Codes",
         "text": "As an admin, add all participants to your group with their names and optional email addresses. Share the group invite code and individual login codes with each person so they can join and create their wishlists.",
-        "url": "https://secretsecretsanta.wagnerway.co.za/admin/dashboard",
+        "url": "https://secretsanta.wagnerway.co.za/admin/dashboard",
         "position": 2
       },
       {
         "@type": "HowToStep",
         "name": "Generate Secret Santa Assignments",
         "text": "Once all participants have joined and created their wishlists, click 'Generate Assignments' in the admin dashboard. The algorithm will randomly assign each person a Secret Santa recipient. Everyone can then log in to see who they're buying for and view their recipient's wishlist.",
-        "url": "https://secretsecretsanta.wagnerway.co.za/admin/dashboard",
+        "url": "https://secretsanta.wagnerway.co.za/admin/dashboard",
         "position": 3
       }
     ]
@@ -648,7 +648,7 @@ export default function Home() {
             <div className="border-t border-white/5 pt-6 text-center">
               <p className="text-gray-500 text-sm">
                 &copy; {new Date().getFullYear()} Secret Santa Generator &bull; Free Online Gift Exchange Tool &bull;{" "}
-                <a href="https://secretsecretsanta.wagnerway.co.za" className="text-santa-gold hover:text-santa-gold-dark transition-colors">
+                <a href="https://secretsanta.wagnerway.co.za" className="text-santa-gold hover:text-santa-gold-dark transition-colors">
                   secretsanta.wagnerway.co.za
                 </a>
               </p>

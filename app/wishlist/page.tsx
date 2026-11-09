@@ -56,18 +56,11 @@ export default function Wishlist() {
 
   const loadPersonData = async (gId: string) => {
     try {
-      const [authRes, groupRes] = await Promise.all([
-        fetch("/api/auth/login", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ loginCode: "__session_reload__", groupId: gId }),
-        }),
-        fetch(`/api/groups/${gId}`)
+      // Person data comes from the session-aware endpoint; the group gives the budget.
+      const [personRes, groupRes] = await Promise.all([
+        fetch(`/api/auth/person-data`),
+        fetch(`/api/groups/${gId}`),
       ]);
-
-      // Use the person data endpoint instead of re-login
-      // We'll fetch person data via the session-aware endpoint
-      const personRes = await fetch(`/api/auth/person-data`);
       if (personRes.ok) {
         const data = await personRes.json();
 

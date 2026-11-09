@@ -1,6 +1,6 @@
 # Secret Santa - Multi-Tenant Gift Exchange Platform
 
-A free, self-hosted web application for managing Secret Santa gift exchanges. Perfect for families, friend groups, and communities worldwide. Features multi-tenancy, unique login codes, wishlist management, and automated Secret Santa partner assignments.
+A web application for managing Secret Santa gift exchanges, live at https://secretsanta.wagnerway.co.za. Free for groups of up to 10 people; a one-time $10 Unlimited upgrade (Stripe) removes the limit for a group. Perfect for families, friend groups, and communities worldwide. Features multi-tenancy, unique login codes, wishlist management, and automated Secret Santa partner assignments.
 
 ## Features
 
@@ -204,3 +204,30 @@ This is a personal project for family use. Feel free to adapt it for your own ne
 ## Support
 
 For issues or questions, please check the code comments or create an issue in the repository.
+
+
+## Payments (Unlimited upgrade)
+
+- One-time $10 USD per group, sold through Stripe Checkout from the group admin dashboard.
+- `POST /api/stripe/checkout` (admin session) creates the Checkout Session; Stripe redirects back to
+  `/admin/dashboard?checkout=success&session_id=…`, where the dashboard calls `POST /api/stripe/confirm`.
+  That endpoint re-reads the session from Stripe and upgrades the group only if it is paid and belongs to the admin's group.
+- `POST /api/stripe/webhook` (`checkout.session.completed`, `checkout.session.async_payment_succeeded`) applies the same
+  idempotent upgrade as a safety net.
+- Env: `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`, `STRIPE_PRICE_UNLIMITED` (falls back to an inline $10 price).
+
+## Legal pages
+
+`/terms`, `/privacy`, `/refunds`. Operator, contact and governing law come from `LEGAL_OPERATOR`,
+`LEGAL_CONTACT_EMAIL`, `LEGAL_JURISDICTION`. Review them before changing prices or what the app stores.
+
+## Production deployment
+
+Docker → GHCR (`.github/workflows/release.yml`) → Kubernetes (`deploy/k8s`, CloudNativePG + cloudflared).
+Secrets are described in `deploy/k8s/base/secrets/README.md`. Roll out a new image with:
+
+```bash
+export KUBECONFIG=~/talos-install/cluster/kubeconfig-tailscale
+kubectl apply -k deploy/k8s/overlays/shell-primary
+kubectl -n secretsanta rollout restart deploy/secretsanta-web
+```
