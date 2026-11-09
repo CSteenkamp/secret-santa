@@ -190,6 +190,84 @@ Sent from your family's Secret Santa app
   }
 }
 
+// Send the organizer their group details so they can find their way back in.
+// The address is used once for this email and is not stored.
+export async function sendOrganizerWelcomeEmail(
+  email: string,
+  groupName: string,
+  inviteCode: string,
+  organizerLink: string,
+  joinLink: string
+): Promise<boolean> {
+  try {
+    const transporter = createTransporter();
+
+    const textContent = `Your Secret Santa group "${groupName}" is ready.
+
+Invite code: ${inviteCode}
+
+Organizer dashboard (you will be asked for the admin password you chose):
+${organizerLink}
+
+Link to share with participants:
+${joinLink}
+
+Keep this email: the invite code plus your admin password are the only way back into the dashboard.
+`;
+
+    const htmlContent = `
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Your Secret Santa group is ready</title>
+  <style>
+    body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+    .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+    .header { background: linear-gradient(135deg, #dc2626, #16a34a); color: white; padding: 30px; text-align: center; border-radius: 10px 10px 0 0; }
+    .content { background: #f9f9f9; padding: 30px; border-radius: 0 0 10px 10px; }
+    .code { font-family: monospace; font-size: 28px; letter-spacing: 4px; background: #fff; border: 1px solid #ddd; padding: 12px 20px; display: inline-block; border-radius: 6px; }
+    .button { display: inline-block; background: #16a34a; color: white; padding: 14px 28px; text-decoration: none; border-radius: 5px; font-weight: bold; margin: 16px 0; }
+    .footer { text-align: center; color: #666; font-size: 12px; margin-top: 20px; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>🎄 Your Secret Santa group is ready</h1>
+      <p>${groupName}</p>
+    </div>
+    <div class="content">
+      <p>Your invite code:</p>
+      <p><span class="code">${inviteCode}</span></p>
+      <p><a class="button" href="${organizerLink}">Open organizer dashboard</a><br>
+      <small>You will be asked for the admin password you chose.</small></p>
+      <p>Link to share with participants:<br><a href="${joinLink}">${joinLink}</a></p>
+      <p>Keep this email. The invite code plus your admin password are the only way back into the dashboard.</p>
+    </div>
+    <div class="footer">
+      <p>You received this because this address was entered when the group was created. We do not store it.</p>
+    </div>
+  </div>
+</body>
+</html>`;
+
+    await transporter.sendMail({
+      from: process.env.EMAIL_FROM || 'Secret Santa <noreply@localhost>',
+      to: email,
+      subject: `🎄 Your Secret Santa group "${groupName}" is ready - invite code ${inviteCode}`,
+      text: textContent,
+      html: htmlContent,
+    });
+
+    return true;
+  } catch (error) {
+    console.error('Failed to send organizer welcome email:', error);
+    return false;
+  }
+}
+
 // Test email configuration
 export async function testEmailConfig(): Promise<boolean> {
   try {

@@ -3,6 +3,7 @@
 import { Suspense, useCallback, useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
+import { ConfirmDialog, ConfirmRequest } from "@/components/ConfirmDialog";
 
 interface Person {
   id: string;
@@ -45,17 +46,21 @@ function AdminDashboardInner() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [showWelcome, setShowWelcome] = useState(false);
+  const [welcomeEmailed, setWelcomeEmailed] = useState(false);
+  const [confirmRequest, setConfirmRequest] = useState<ConfirmRequest | null>(null);
   const [origin, setOrigin] = useState("");
 
   useEffect(() => {
     setOrigin(window.location.origin);
     if (searchParams.get("welcome") === "1") {
       setShowWelcome(true);
+      setWelcomeEmailed(searchParams.get("emailed") === "1");
       router.replace("/admin/dashboard");
     }
   }, [searchParams, router]);
 
   const joinLink = groupInfo.inviteCode ? `${origin}/join?code=${groupInfo.inviteCode}` : "";
+  const organizerLink = groupInfo.inviteCode ? `${origin}/admin?code=${groupInfo.inviteCode}` : "";
 
   const copyText = async (text: string, label: string) => {
     setError("");
@@ -222,10 +227,17 @@ function AdminDashboardInner() {
     }
   };
 
-  const handleDeletePerson = async (id: string, name: string) => {
-    if (!confirm(`Are you sure you want to delete ${name}?`)) {
-      return;
-    }
+  const handleDeletePerson = (id: string, name: string) => {
+    setConfirmRequest({
+      title: `Remove ${name}?`,
+      message: `${name} will be removed from the group along with their wishlist. If assignments already exist, regenerate them afterwards.`,
+      confirmLabel: "Remove",
+      tone: "danger",
+      onConfirm: () => deletePerson(id, name),
+    });
+  };
+
+  const deletePerson = async (id: string, name: string) => {
 
     setError("");
     setSuccessMessage("");
@@ -247,14 +259,17 @@ function AdminDashboardInner() {
     }
   };
 
-  const handleGenerateAssignments = async () => {
-    if (
-      !confirm(
-        "This will generate Secret Santa assignments for everyone. Make sure all people have been added. Continue?"
-      )
-    ) {
-      return;
-    }
+  const handleGenerateAssignments = () => {
+    setConfirmRequest({
+      title: "Generate assignments?",
+      message: `Everyone currently in the group (${people.length} people) will be matched. Make sure all participants have been added first; you can regenerate later if someone joins late.`,
+      confirmLabel: "Generate",
+      tone: "primary",
+      onConfirm: generateAssignments,
+    });
+  };
+
+  const generateAssignments = async () => {
 
     setError("");
     setSuccessMessage("");
@@ -280,10 +295,17 @@ function AdminDashboardInner() {
     }
   };
 
-  const handleDeleteAssignments = async () => {
-    if (!confirm("Are you sure you want to delete all assignments for this year?")) {
-      return;
-    }
+  const handleDeleteAssignments = () => {
+    setConfirmRequest({
+      title: "Delete and regenerate?",
+      message: "All current assignments for this year will be deleted. Participants who already saw their match will see a new one after you generate again.",
+      confirmLabel: "Delete assignments",
+      tone: "danger",
+      onConfirm: deleteAssignments,
+    });
+  };
+
+  const deleteAssignments = async () => {
 
     setError("");
     setSuccessMessage("");
@@ -403,7 +425,16 @@ function AdminDashboardInner() {
                   <li>Once everyone is in, click <strong>Generate Assignments</strong>.</li>
                 </ol>
                 <p className="text-xs text-gray-400 mt-2">
-                  Bookmark this page. To get back later, go to <span className="text-santa-gold">Join Existing Group</span>, enter your invite code and choose Admin Portal.
+                  {welcomeEmailed
+                    ? "We've emailed you your invite code and a link back to this dashboard."
+                    : "Save your invite code somewhere safe: it plus your admin password are the only way back in."}{" "}
+                  <button
+                    type="button"
+                    onClick={() => copyText(organizerLink, "Organizer link")}
+                    className="text-santa-gold hover:text-santa-gold-dark underline underline-offset-2"
+                  >
+                    Copy organizer link
+                  </button>
                 </p>
               </div>
               <button onClick={() => setShowWelcome(false)} aria-label="Dismiss" className="text-gray-400 hover:text-santa-snow text-xl leading-none">&times;</button>
@@ -773,6 +804,7 @@ function AdminDashboardInner() {
           </div>
         )}
       </div>
+      <ConfirmDialog request={confirmRequest} onClose={() => setConfirmRequest(null)} />
     </div>
   );
 }

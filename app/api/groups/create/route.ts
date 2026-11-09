@@ -4,10 +4,18 @@ import { generateGroupInviteCode } from "@/lib/utils";
 import { validatePassword } from "@/lib/password";
 import bcrypt from "bcryptjs";
 import { getSession } from "@/lib/session";
+import { sendOrganizerWelcomeEmail } from "@/lib/email";
+
+const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 export async function POST(request: NextRequest) {
   try {
-    const { groupName, adminPassword, year } = await request.json();
+    const { groupName, adminPassword, year, organizerEmail } = await request.json();
+
+    const email = typeof organizerEmail === "string" ? organizerEmail.trim() : "";
+    if (email && !EMAIL_RE.test(email)) {
+      return NextResponse.json({ error: "Organizer email address is not valid" }, { status: 400 });
+    }
 
     if (!groupName || groupName.trim().length === 0) {
       return NextResponse.json({ error: "Group name is required" }, { status: 400 });
@@ -60,7 +68,21 @@ export async function POST(request: NextRequest) {
     session.adminInviteCode = group.inviteCode;
     await session.save();
 
+    // Optional: email the organizer their invite code and dashboard link (address is not stored).
+    let emailSent = false;
+    if (email) {
+      const base = process.env.NEXTAUTH_URL || request.nextUrl.origin;
+      emailSent = await sendOrganizerWelcomeEmail(
+        email,
+        group.name,
+        group.inviteCode,
+        `${base}/admin?code=${group.inviteCode}`,
+        `${base}/join?code=${group.inviteCode}`
+      );
+    }
+
     return NextResponse.json({
+      emailSent,
       group: {
         id: group.id,
         name: group.name,

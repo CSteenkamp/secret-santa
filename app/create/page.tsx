@@ -10,6 +10,7 @@ export default function CreateGroup() {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [year, setYear] = useState(new Date().getFullYear());
   const [agreed, setAgreed] = useState(false);
+  const [organizerEmail, setOrganizerEmail] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const router = useRouter();
@@ -47,7 +48,7 @@ export default function CreateGroup() {
       const res = await fetch("/api/groups/create", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ groupName, adminPassword, year }),
+        body: JSON.stringify({ groupName, adminPassword, year, organizerEmail }),
       });
 
       const data = await res.json();
@@ -59,7 +60,7 @@ export default function CreateGroup() {
       }
 
       // The server logged us in as admin; go straight to the dashboard.
-      router.push("/admin/dashboard?welcome=1");
+      router.push(`/admin/dashboard?welcome=1${data.emailSent ? "&emailed=1" : ""}`);
     } catch (err) {
       setError("An error occurred. Please try again.");
       setLoading(false);
@@ -127,6 +128,24 @@ export default function CreateGroup() {
             />
             <p className="text-xs text-gray-500 mt-1">
               You&apos;ll use this to access the admin portal
+            </p>
+          </div>
+
+          <div>
+            <label htmlFor="organizerEmail" className="block text-sm font-medium text-gray-300 mb-2">
+              Your email <span className="text-gray-500">(optional, recommended)</span>
+            </label>
+            <input
+              type="email"
+              id="organizerEmail"
+              value={organizerEmail}
+              onChange={(e) => setOrganizerEmail(e.target.value)}
+              className="w-full px-4 py-2 bg-santa-dark border border-white/10 rounded-lg focus:ring-2 focus:ring-santa-gold focus:border-transparent text-santa-snow placeholder-gray-500"
+              placeholder="you@example.com"
+              autoComplete="email"
+            />
+            <p className="text-xs text-gray-500 mt-1">
+              We&apos;ll send you your invite code and a link back to the dashboard, then forget the address. Without it, you need your invite code to get back in.
             </p>
           </div>
 

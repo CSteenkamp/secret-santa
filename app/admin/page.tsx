@@ -1,10 +1,11 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { Suspense, useState, useEffect } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 
-export default function AdminLogin() {
+function AdminLoginInner() {
+  const searchParams = useSearchParams();
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
@@ -13,19 +14,42 @@ export default function AdminLogin() {
   const router = useRouter();
 
   useEffect(() => {
-    // Check if we have group info from previous steps (sessionStorage used only for join flow)
+    // Organizer links look like /admin?code=ABC123: resolve the group from the code.
+    const code = (searchParams.get("code") || "").trim().toUpperCase();
+    if (code.length === 6) {
+      fetch("/api/groups/verify", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ inviteCode: code }),
+      })
+        .then(async (res) => {
+          const data = await res.json();
+          if (!res.ok || !data.group) {
+            router.push("/join");
+            return;
+          }
+          sessionStorage.setItem("groupId", data.group.id);
+          sessionStorage.setItem("groupName", data.group.name);
+          sessionStorage.setItem("inviteCode", data.group.inviteCode);
+          setGroupId(data.group.id);
+          setGroupName(data.group.name);
+        })
+        .catch(() => router.push("/join"));
+      return;
+    }
+
+    // Otherwise we rely on the invite-code step having run (sessionStorage).
     const storedGroupId = sessionStorage.getItem("groupId");
     const storedGroupName = sessionStorage.getItem("groupName");
 
     if (!storedGroupId) {
-      // No group selected, send them to the invite-code step
       router.push("/join");
       return;
     }
 
     setGroupId(storedGroupId);
     setGroupName(storedGroupName || "Your Group");
-  }, [router]);
+  }, [router, searchParams]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -114,5 +138,13 @@ export default function AdminLogin() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function AdminLogin() {
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-santa-dark" />}>
+      <AdminLoginInner />
+    </Suspense>
   );
 }

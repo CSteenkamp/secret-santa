@@ -81,6 +81,7 @@ jest.mock('@/lib/utils', () => ({
 jest.mock('@/lib/email', () => ({
   generateMagicToken: jest.fn().mockReturnValue('mock-magic-token'),
   sendMagicLinkEmail: jest.fn().mockResolvedValue(true),
+  sendOrganizerWelcomeEmail: jest.fn().mockResolvedValue(true),
   verifyMagicToken: jest.fn(),
 }));
 
@@ -98,7 +99,7 @@ import bcrypt from 'bcryptjs';
 import { getSession } from '@/lib/session';
 import { authRateLimit, magicLinkRateLimit, adminAuthRateLimit } from '@/lib/rate-limit';
 import { generateGroupInviteCode, generateLoginCode, validateWishlistItems } from '@/lib/utils';
-import { generateMagicToken, sendMagicLinkEmail, verifyMagicToken } from '@/lib/email';
+import { generateMagicToken, sendMagicLinkEmail, sendOrganizerWelcomeEmail, verifyMagicToken } from '@/lib/email';
 import { generateSecretSantaAssignments } from '@/lib/secret-santa';
 
 import { POST as createGroup } from '@/app/api/groups/create/route';
@@ -292,6 +293,42 @@ describe('POST /api/groups/create', () => {
         data: expect.objectContaining({ name: 'Test Group', inviteCode: 'ABC123' }),
       }),
     );
+  });
+
+  it('rejects a malformed organizer email', async () => {
+    const req = makePostRequest(url, { groupName: 'Test Group', adminPassword: VALID_PASSWORD, organizerEmail: 'not-an-email' });
+    const res = await createGroup(req);
+    expect(res.status).toBe(400);
+    expect(mockPrismaDb.group.create).not.toHaveBeenCalled();
+  });
+
+  it('emails the organizer their invite code when an address is given', async () => {
+    mockPrismaDb.group.findUnique.mockResolvedValue(null);
+    mockPrismaDb.group.create.mockResolvedValue({
+      id: 'group-1', name: 'Test Group', inviteCode: 'ABC123', year: 2026,
+      adminConfig: { id: 'ac-1', hashedPassword: 'h', groupId: 'group-1' },
+    });
+    const req = makePostRequest(url, { groupName: 'Test Group', adminPassword: VALID_PASSWORD, organizerEmail: 'org@example.com' });
+    const res = await createGroup(req);
+    expect(res.status).toBe(201);
+    const json = await res.json();
+    expect(json.emailSent).toBe(true);
+    expect(sendOrganizerWelcomeEmail).toHaveBeenCalledWith(
+      'org@example.com', 'Test Group', 'ABC123',
+      expect.stringContaining('/admin?code=ABC123'),
+      expect.stringContaining('/join?code=ABC123'),
+    );
+  });
+
+  it('does not email anyone when no organizer address is given', async () => {
+    mockPrismaDb.group.findUnique.mockResolvedValue(null);
+    mockPrismaDb.group.create.mockResolvedValue({
+      id: 'group-1', name: 'Test Group', inviteCode: 'ABC123', year: 2026,
+      adminConfig: { id: 'ac-1', hashedPassword: 'h', groupId: 'group-1' },
+    });
+    const res = await createGroup(makePostRequest(url, { groupName: 'Test Group', adminPassword: VALID_PASSWORD }));
+    expect(res.status).toBe(201);
+    expect(sendOrganizerWelcomeEmail).not.toHaveBeenCalled();
   });
 
   it('regenerates the invite code when it already exists', async () => {

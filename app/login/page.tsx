@@ -168,7 +168,8 @@ export default function Login() {
                 required
               />
               <p className="text-xs text-gray-500 mt-1">
-                Your 8-character login code was shared with you by the organizer
+                Your 8-character login code was shared with you by the organizer.
+                Lost it? Ask your organizer &mdash; it&apos;s shown next to your name on their dashboard.
               </p>
             </div>
 

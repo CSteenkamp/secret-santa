@@ -27,6 +27,7 @@ export default function PrivacyPage() {
         <ul className="list-disc pl-6 space-y-1">
           <li><strong className="text-santa-snow">Group details:</strong> group name, year, optional gift budget, and a hashed admin password. We never store the password itself.</li>
           <li><strong className="text-santa-snow">Participant details:</strong> the name and optional email address the organiser enters, a generated login code, wishlist items (titles and links), and the Secret Santa assignment.</li>
+          <li><strong className="text-santa-snow">Organiser email (optional):</strong> if the organiser gives an email address when creating a group, we use it once to send the invite code and dashboard link. It is not stored.</li>
           <li><strong className="text-santa-snow">Purchase details:</strong> if a group is upgraded, Stripe sends us the checkout reference, the amount paid and the email used at checkout. Card numbers are handled only by Stripe.</li>
           <li><strong className="text-santa-snow">Technical data:</strong> IP address and request logs used for security and rate limiting, kept for a short period.</li>
         </ul>
