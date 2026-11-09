@@ -7,7 +7,7 @@ import { SiteFooter } from "@/components/SiteFooter";
 const inter = Inter({ subsets: ["latin"] });
 
 // Cloudflare Web Analytics (cookie-less, no personal data). Token is public by design.
-const CF_BEACON_TOKEN = process.env.NEXT_PUBLIC_CF_BEACON_TOKEN || "9ccd9881df7746f29bd870afad039cfc";
+const CF_BEACON_TOKEN = process.env.NEXT_PUBLIC_CF_BEACON_TOKEN || "444a18cd2e0b45b890e66c8a54d5aa2d";
 
 export const metadata: Metadata = {
   title: {
@@ -29,7 +29,7 @@ export const metadata: Metadata = {
   applicationName: "Secret Santa Generator",
   authors: [{ name: "Secret Santa Generator" }],
   creator: "Secret Santa Generator",
-  metadataBase: new URL("https://secretsanta.wagnerway.co.za"),
+  metadataBase: new URL("https://secretsanta.realtap.app"),
   openGraph: {
     type: "website",
     locale: "en_US",

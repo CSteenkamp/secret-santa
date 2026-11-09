@@ -1,6 +1,6 @@
 # Secret Santa - Multi-Tenant Gift Exchange Platform
 
-A web application for managing Secret Santa gift exchanges, live at https://secretsanta.wagnerway.co.za. Free for groups of up to 10 people; a one-time $10 Unlimited upgrade (Stripe) removes the limit for a group. Perfect for families, friend groups, and communities worldwide. Features multi-tenancy, unique login codes, wishlist management, and automated Secret Santa partner assignments.
+A web application for managing Secret Santa gift exchanges, live at https://secretsanta.realtap.app. Free for groups of up to 10 people; a one-time $10 Unlimited upgrade (Stripe) removes the limit for a group. Perfect for families, friend groups, and communities worldwide. Features multi-tenancy, unique login codes, wishlist management, and automated Secret Santa partner assignments.
 
 ## Features
 

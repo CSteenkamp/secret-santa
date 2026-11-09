@@ -32,7 +32,7 @@ kubectl get secret ghcr-pull -n kostas -o json \
 
 The Unlimited upgrade is sold through the **Realtap** Stripe account (`acct_1UXE6DBkC5aYbBTB`):
 product `prod_Vb39FSX0YSVCNB`, price `price_1UZr3KBkC5aYbBTBKa5lNMkK` ($10 one-time).
-Webhook destination `secret-santa` → `https://secretsanta.wagnerway.co.za/api/stripe/webhook`,
+Webhook destination `secret-santa` → `https://secretsanta.realtap.app/api/stripe/webhook`,
 events `checkout.session.completed`, `checkout.session.async_payment_succeeded`.
 
 ```bash

@@ -12,7 +12,7 @@ function validateEnv() {
     EMAIL_HOST: "SMTP server hostname",
     EMAIL_USER: "SMTP authentication username",
     EMAIL_PASS: "SMTP authentication password",
-    NEXTAUTH_URL: "Public base URL of the site (e.g. https://secretsanta.wagnerway.co.za)",
+    NEXTAUTH_URL: "Public base URL of the site (e.g. https://secretsanta.realtap.app)",
     STRIPE_SECRET_KEY: "Stripe secret/restricted key; without it the Unlimited upgrade is unavailable",
     STRIPE_WEBHOOK_SECRET: "Stripe webhook signing secret; without it /api/stripe/webhook returns 503",
     STRIPE_PRICE_UNLIMITED: "Stripe Price id of the $10 Unlimited upgrade; without it an inline price is used",

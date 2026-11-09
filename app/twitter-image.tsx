@@ -43,7 +43,7 @@ export default function OpenGraphImage() {
           <span style={{ padding: "10px 22px", border: "2px solid #EAB308", borderRadius: 999 }}>Free for 10 people</span>
           <span style={{ padding: "10px 22px", border: "2px solid #EF4444", borderRadius: 999 }}>Ready in 2 minutes</span>
         </div>
-        <div style={{ fontSize: 26, color: "#94A3B8", marginTop: 50 }}>secretsanta.wagnerway.co.za</div>
+        <div style={{ fontSize: 26, color: "#94A3B8", marginTop: 50 }}>secretsanta.realtap.app</div>
       </div>
     ),
     { ...size }

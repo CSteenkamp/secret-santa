@@ -13,7 +13,17 @@ const nextConfig = {
     return [{ source: '/:path*', headers: securityHeaders }];
   },
   async redirects() {
-    return [{ source: '/pricing', destination: '/#pricing-heading', permanent: false }];
+    return [
+      // Legacy hostname: send browsers to the canonical host. API routes are excluded so
+      // Stripe webhooks or old integrations that still call the old host keep working.
+      {
+        source: '/:path((?!api/).*)',
+        has: [{ type: 'host', value: 'secretsanta.wagnerway.co.za' }],
+        destination: 'https://secretsanta.realtap.app/:path',
+        permanent: true,
+      },
+      { source: '/pricing', destination: '/#pricing-heading', permanent: false },
+    ];
   },
 };
 

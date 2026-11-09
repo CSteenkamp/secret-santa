@@ -1,6 +1,7 @@
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
-# Live deployment on shell-primary: secretsanta.wagnerway.co.za.
+# Live deployment on shell-primary: secretsanta.realtap.app
+# (secretsanta.wagnerway.co.za is kept as a legacy hostname that the app 301-redirects).
 # Apply with: kubectl apply -k deploy/k8s/overlays/shell-primary
 namespace: secretsanta
 resources:
@@ -19,6 +20,10 @@ patches:
           metrics: 0.0.0.0:2000
           no-autoupdate: true
           ingress:
+            - hostname: secretsanta.realtap.app
+              service: http://secretsanta-web:3000
+              originRequest:
+                connectTimeout: 30s
             - hostname: secretsanta.wagnerway.co.za
               service: http://secretsanta-web:3000
               originRequest:

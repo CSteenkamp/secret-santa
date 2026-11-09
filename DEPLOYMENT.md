@@ -1,6 +1,6 @@
 # Deployment Guide - Secret Santa Multi-Tenant
 
-> **Production (secretsanta.wagnerway.co.za)** runs on Kubernetes, not docker-compose: see `deploy/k8s/`
+> **Production (secretsanta.realtap.app)** runs on Kubernetes, not docker-compose: see `deploy/k8s/`
 > and `deploy/k8s/base/secrets/README.md`. Images are built by `.github/workflows/release.yml`.
 > The docker-compose instructions below remain valid for self-hosting a single instance.
 

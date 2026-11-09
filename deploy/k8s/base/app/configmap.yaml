@@ -3,7 +3,7 @@ kind: ConfigMap
 metadata:
   name: secretsanta-config
 data:
-  NEXTAUTH_URL: "https://secretsanta.wagnerway.co.za"
+  NEXTAUTH_URL: "https://secretsanta.realtap.app"
   MAGIC_LINK_EXPIRES_MINUTES: "15"
   # SMTP for magic-link login. EMAIL_USER / EMAIL_PASS live in secretsanta-secrets.
   EMAIL_HOST: "email-smtp.eu-west-1.amazonaws.com"
