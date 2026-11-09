@@ -16,16 +16,20 @@ export async function GET(request: NextRequest) {
     }
 
     // Verify the user has access to this group
-    if (session.isAdmin && session.adminGroupId !== groupId) {
-      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
-    }
-    if (session.isLoggedIn && session.groupId !== groupId) {
+    const isGroupAdmin = Boolean(session.isAdmin && session.adminGroupId === groupId);
+    const isGroupMember = Boolean(session.isLoggedIn && session.groupId === groupId);
+    if (!isGroupAdmin && !isGroupMember) {
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
 
+    // Login codes and emails are only for the group admin; participants get names only.
     const people = await prisma.person.findMany({
       where: { groupId },
-      include: {
+      select: {
+        id: true,
+        name: true,
+        createdAt: true,
+        ...(isGroupAdmin ? { loginCode: true, email: true } : {}),
         wishlistItems: {
           orderBy: { order: "asc" },
         },
@@ -70,7 +74,8 @@ export async function POST(request: NextRequest) {
     // Free groups are capped; Unlimited groups are not
     const limit = await enforceParticipantLimit(groupId);
     if (!limit.allowed) {
-      return NextResponse.json({ error: limit.message, code: limit.code }, { status: 403 });
+      const status = limit.code === "PARTICIPANT_LIMIT" ? 403 : 404;
+      return NextResponse.json({ error: limit.message, code: limit.code }, { status });
     }
 
     // Validate email if provided

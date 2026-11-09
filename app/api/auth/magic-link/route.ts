@@ -52,7 +52,7 @@ export async function POST(request: NextRequest) {
     });
 
     // Create magic link URL
-    const baseUrl = process.env.NEXTAUTH_URL || 'http://localhost:3001';
+    const baseUrl = process.env.NEXTAUTH_URL || 'http://localhost:3000';
     const magicLink = `${baseUrl}/auth/verify?token=${token}`;
 
     // Send email
