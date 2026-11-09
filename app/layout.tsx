@@ -1,9 +1,13 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
+import Script from "next/script";
 import "./globals.css";
 import { SiteFooter } from "@/components/SiteFooter";
 
 const inter = Inter({ subsets: ["latin"] });
+
+// Cloudflare Web Analytics (cookie-less, no personal data). Token is public by design.
+const CF_BEACON_TOKEN = process.env.NEXT_PUBLIC_CF_BEACON_TOKEN || "9ccd9881df7746f29bd870afad039cfc";
 
 export const metadata: Metadata = {
   title: {
@@ -76,6 +80,14 @@ export default function RootLayout({
       <body className={`${inter.className} antialiased`}>
         {children}
         <SiteFooter />
+        {CF_BEACON_TOKEN && (
+          <Script
+            id="cf-web-analytics"
+            strategy="afterInteractive"
+            src="https://static.cloudflareinsights.com/beacon.min.js"
+            data-cf-beacon={`{"token": "${CF_BEACON_TOKEN}"}`}
+          />
+        )}
         <script
           dangerouslySetInnerHTML={{
             __html: `

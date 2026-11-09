@@ -52,6 +52,7 @@ export default function PrivacyPage() {
       <Section title="5. Who we share it with">
         <ul className="list-disc pl-6 space-y-1">
           <li><strong className="text-santa-snow">Stripe</strong> (payments) when a group is upgraded. See Stripe&rsquo;s privacy policy at stripe.com/privacy.</li>
+          <li><strong className="text-santa-snow">Cloudflare Web Analytics</strong> to count page views and measure performance. It sets no cookies, does not fingerprint devices and does not track visitors across sites. Cloudflare also provides our hosting network.</li>
           <li><strong className="text-santa-snow">Email delivery provider</strong> to send login links to participants who have an email address.</li>
           <li><strong className="text-santa-snow">Cloudflare</strong>, which routes traffic to the Service and protects it from attacks.</li>
           <li>Other participants in your group: your name and wishlist are visible to the person assigned to you; the organiser can see all names, codes, wishlists and assignments.</li>
