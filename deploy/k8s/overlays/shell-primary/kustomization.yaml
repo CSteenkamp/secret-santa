@@ -6,7 +6,7 @@ namespace: secretsanta
 resources:
   - ../../base
 images:
-  - name: ghcr.io/csteenkamp/secret-santa
+  - name: ghcr.io/csteenkamp/secretsanta-web
     newTag: latest
 patches:
   - target: {kind: ConfigMap, name: secretsanta-cloudflared-config}

@@ -7,7 +7,7 @@ All live in namespace `secretsanta`.
 | `secretsanta-db` | `username`, `password` (type `kubernetes.io/basic-auth`) | CNPG bootstrap + managed role password |
 | `secretsanta-secrets` | `DATABASE_URL`, `MAGIC_LINK_SECRET`, `SESSION_SECRET`, `EMAIL_USER`, `EMAIL_PASS`, `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET` | App runtime secrets |
 | `secretsanta-cloudflared-credentials` | `credentials.json` | Tunnel `secretsanta-shell-primary` (7aeae5e3-716b-4f3e-b245-c44e4bdfe3e4) |
-| `ghcr-pull` | `.dockerconfigjson` | Pull `ghcr.io/csteenkamp/secret-santa` |
+| `ghcr-pull` | `.dockerconfigjson` | Pull `ghcr.io/csteenkamp/secretsanta-web` |
 
 ```bash
 export KUBECONFIG=~/talos-install/cluster/kubeconfig-tailscale

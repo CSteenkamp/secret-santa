@@ -24,7 +24,7 @@ spec:
         seccompProfile: { type: RuntimeDefault }
       initContainers:
         - name: migrate
-          image: ghcr.io/csteenkamp/secret-santa
+          image: ghcr.io/csteenkamp/secretsanta-web
           command: ["node", "node_modules/prisma/build/index.js", "migrate", "deploy"]
           env:
             - name: DATABASE_URL
@@ -40,7 +40,7 @@ spec:
             capabilities: { drop: ["ALL"] }
       containers:
         - name: web
-          image: ghcr.io/csteenkamp/secret-santa
+          image: ghcr.io/csteenkamp/secretsanta-web
           ports:
             - { name: http, containerPort: 3000 }
           envFrom:
